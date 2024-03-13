@@ -29,15 +29,15 @@ void FlyCamera::Update(float _deltaTime)
 	glm::vec3 moveUp = glm::vec3(0);
 
 	if (input->isKeyDown(aie::INPUT_KEY_Q))
-		moveUp += m_up * _deltaTime;
+		moveUp -= m_up * _deltaTime;
 
 	if (input->isKeyDown(aie::INPUT_KEY_E))
-		moveUp -= m_up * _deltaTime;
+		moveUp += m_up * _deltaTime;
 
 	float speed = 1;
 
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT))
-		speed = 2;
+		speed = 5;
 
 	m_position += move * speed;
 	m_position += moveUp * speed;

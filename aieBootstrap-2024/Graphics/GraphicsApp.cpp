@@ -40,6 +40,8 @@ bool GraphicsApp::startup() {
 
 	SolarSystem(1);
 
+	showPlanets = false;
+
 	return LaunchShaders();
 }
 
@@ -72,7 +74,6 @@ void GraphicsApp::update(float deltaTime) {
 	bc->CalculationUpdate(deltaTime);
 
 	// custom function
-
 	if (showPlanets)
 	{
 		for each (Planet * planet in solarSystem)
@@ -111,12 +112,9 @@ void GraphicsApp::draw() {
 
 	auto pv = m_projectionMatrix * m_viewMatrix;
 
-	// ind the shader
-	m_simpleShader.bind();
-
-	m_simpleShader.bindUniform("ProjectionViewModel", pv * m_quadTransform);
-
-	m_quadMesh.Draw();
+	m_meatBoyTexture.bind();
+	m_meatBoyTexture.bindUniform("ProjectionViewModel", pv * m_meatBoyTransform);
+	m_meatBoyMesh.draw();
 
 	Gizmos::draw(pv);
 }
@@ -131,20 +129,87 @@ void GraphicsApp::ImGUI_Helper()
 	ImGui::End();
 }
 
+void GraphicsApp::SpawnCube()
+{
+	// define 4 vertices for 2 triangles
+	Mesh::Vertex vertices[8];
+
+	// Top
+	vertices[0].position = { -0.5f, 0.5f, 0.5f, 1 };
+	vertices[1].position = { 0.5f,  0.5f, 0.5f, 1 }; 
+	vertices[2].position = { -0.5f, 0.5f, -0.5f, 1 }; 
+	vertices[3].position = { 0.5f,  0.5f, -0.5f, 1 }; 
+
+	// Base
+	vertices[4].position = { -0.5f, -0.5f, 0.5f, 1 };	// front right
+	vertices[5].position = { 0.5f, -0.5f, 0.5f, 1 };	// back right
+	vertices[6].position = { -0.5f, -0.5f, -0.5f, 1 }; // front left 
+	vertices[7].position = { 0.5f, -0.5f, -0.5f, 1 };	// back left
+
+	unsigned int indices[38] = { 2, 3, 1, 1, 0, 2,
+								  7, 5, 1, 1, 3, 7,
+								  6, 7, 3, 3, 2, 6,
+								  5, 4, 0, 0, 1, 5,
+								  4, 5, 6, 6, 5, 7 };
+
+	m_boxMesh.Initialise(8, vertices, 38, indices);
+
+	for (int i = 0; i < 8; i++)
+	{
+		if(i < 7)
+			Gizmos::addLine(vertices[i].position, vertices[i + 1].position, glm::vec4(1, 1, 1, 1));
+		else	
+			Gizmos::addLine(vertices[i].position, vertices[0].position, glm::vec4(1, 1, 1, 1));
+	}
+}
+
+void GraphicsApp::SpawnSquare()
+{
+	//// define 4 vertices for 2 triangles
+	//Mesh::Vertex vertices[4];
+
+	//// Base
+	//vertices[0].position = { -0.5f, 0, 0.5f, 1 };	// front right
+	//vertices[1].position = { 0.5f, 0, 0.5f, 1 };	// back right
+	//vertices[2].position = { -0.5f, 0, -0.5f, 1 }; // front left 
+	//vertices[3].position = { 0.5f, 0, -0.5f, 1 };	// back left
+
+	//unsigned int indices[6] = { 0, 1, 2, 2, 1, 3 };
+
+	//m_quadMesh.Initialise(4, vertices, 6, indices);
+}
+
+void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
+{
+	// define 4 vertices for 2 triangles
+
+	if (_segments > 30)
+	{
+		printf("Segment amount is greater than 30");
+		return;
+	}
+
+
+	Mesh::Vertex vertices[30];
+
+	// Base
+	vertices[0].position = { -0.5f, 0, 0.5f, 1 };	// front right
+	vertices[2].position = { 0.5f, 0, 0.5f, 1 };	// back right
+	vertices[4].position = { -0.5f, 0, -0.5f, 1 }; // front left 
+	vertices[6].position = { 0.5f, 0, -0.5f, 1 };	// back left
+
+
+
+	//m_boxMesh.Initialise(8, vertices, 38, indices);
+}
+
 bool GraphicsApp::LaunchShaders()
 {
-	if (!LoadShaders(m_simpleShader, "./shaders/simple.", "Simple Shader"))
+	if (!LoadShaders(m_meatBoyTexture, "./shaders/textured.", "Textured Shader"))
 		return false;
 
-	m_quadMesh.InitialiseQuad();
-
-	m_quadTransform = {
-		10,0,0,0,
-		0,10,0,0,
-		0,0,10,0,
-		0,0,0,1
-	};
-
+	ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
+	
 	return true;
 }
 
@@ -158,25 +223,43 @@ bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _fi
 
 	if (_shaderToLoad.link() == false)
 	{
-		printf(_errorName.append(" Shader Error: %s\n").c_str(), _shaderToLoad.getLastError());
+		printf(_errorName.append("Shader Error: %s\n").c_str(), _shaderToLoad.getLastError());
 		return false;
 	}
 
 	return true;
 }
 
+bool GraphicsApp::ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename, bool _flipTextures, float _scale, glm::vec3 _position) 
+{
+	if (__objMesh.load(_filepath, true, _flipTextures) == false)
+	{
+		printf("Object Mesh loading had an error");
+		return false;
+	}
+
+	_transform = {
+		_scale, 0,0,0,
+		0, _scale, 0,0,
+		0,0,_scale, 0,
+		_position.x, _position.y, _position.z, 1
+	};
+
+	return false;
+}
+
 void GraphicsApp::SolarSystem(float _speed)
 {
 	Planet* sun = new Planet(glm::vec3(0), 1, glm::vec4(0.8f, 0.8f, 0, 1));
-	Planet* mercury = new Planet(glm::vec3(1, 0, 0), .1f, glm::vec4(0.2f, 0.2f, 0.2f, 1), sun);
-	Planet* venus = new Planet(glm::vec3(2, 0, 0), .1f, glm::vec4(0.5f, 0.5f, 0, 1), sun);
-	Planet* earth = new Planet(glm::vec3(3, 0, 0), .1f, glm::vec4(0, 0, 1, 1), sun);
-	Planet* mars = new Planet(glm::vec3(4, 0, 0), .1f, glm::vec4(0.3f, 0.3f, 0, 1), sun);
-	Planet* Jupiter = new Planet(glm::vec3(5, 0, 0), .5f, glm::vec4(0.3, 0.3, 0, 1), sun);
-	Planet* Saturn = new Planet(glm::vec3(6, 0, 0), .5f, glm::vec4(0.3, 0.3, 1, 1), sun);
-	Planet* Uranus = new Planet(glm::vec3(7, 0, 0), .3f, glm::vec4(0.2, 0.2, .8f, 1), sun);
-	Planet* Nerptune = new Planet(glm::vec3(8, 0, 0), .3f, glm::vec4(0, 0, 1, 1), sun);
-	Planet* pluto = new Planet(glm::vec3(9, 0, 0), .1f, glm::vec4(0, 0, 1, 1), sun);
+	Planet* mercury = new Planet(glm::vec3(1, 0, 0), .1f, glm::vec4(0.2f, 0.2f, 0.2f, 1), sun, 1);
+	Planet* venus = new Planet(glm::vec3(2, 0, 0), .1f, glm::vec4(0.5f, 0.5f, 0, 1), sun, .5f);
+	Planet* earth = new Planet(glm::vec3(3, 0, 0), .1f, glm::vec4(0, 0, 1, 1), sun, 2);
+	Planet* mars = new Planet(glm::vec3(4, 0, 0), .1f, glm::vec4(0.3f, 0.3f, 0, 1), sun, 5);
+	Planet* Jupiter = new Planet(glm::vec3(5, 0, 0), .5f, glm::vec4(0.3, 0.3, 0, 1), sun, 3);
+	Planet* Saturn = new Planet(glm::vec3(6, 0, 0), .5f, glm::vec4(0.3, 0.3, 1, 1), sun, 15);
+	Planet* Uranus = new Planet(glm::vec3(7, 0, 0), .3f, glm::vec4(0.2, 0.2, .8f, 1), sun,.1f);
+	Planet* Nerptune = new Planet(glm::vec3(8, 0, 0), .3f, glm::vec4(0, 0, 1, 1), sun, 5);
+	Planet* pluto = new Planet(glm::vec3(9, 0, 0), .1f, glm::vec4(0, 0, 1, 1), sun, 17);
 
 	m_orbitingCamera.SetTarget(sun->position, 5);
 

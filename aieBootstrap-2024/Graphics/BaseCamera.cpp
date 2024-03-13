@@ -7,7 +7,7 @@ BaseCamera::BaseCamera()
 	m_position = vec3(-10, 2, 0);
 	m_theta = 0;
 	m_phi = 0;
-	m_nearRender = 0.3f;
+	m_nearRender = 0.00001f;
 	m_farRender = 1000.f;
 }
 
