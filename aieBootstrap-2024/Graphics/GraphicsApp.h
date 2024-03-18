@@ -49,6 +49,7 @@ protected:
 	aie::ShaderProgram m_bunnyTexture;
 	aie::ShaderProgram m_simplePhong;
 	aie::ShaderProgram m_classicPhong;
+	aie::ShaderProgram m_texturedPhong;
 
 	struct Light {
 		glm::vec3 direction;
@@ -68,6 +69,7 @@ protected:
 	// Spear mesh
 	aie::OBJMesh m_spearMesh;
 	glm::mat4 m_spearTransform;
+	aie::Texture m_spearTexture;
 
 	// Bunny Mesh
 	aie::OBJMesh m_bunnyMesh;
@@ -76,11 +78,15 @@ protected:
 	// Super Meat Boy
 	aie::OBJMesh m_meatBoyMesh;
 	glm::mat4 m_meatBoyTransform;
-	aie::ShaderProgram m_meatBoyTexture;
+	aie::ShaderProgram m_meatBoyShader;
+	aie::Texture m_meatBoyTexture;
 
 	// Dragon Mesh
 	aie::OBJMesh m_dragonMesh;
 	glm::mat4 m_dragonTransform;
+
+	// Nomral Map Phong
+	aie::ShaderProgram m_normalMapPhong;
 
 	glm::mat4 m_quadTransform;
 	glm::mat4 m_boxTransform;

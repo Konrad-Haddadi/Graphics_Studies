@@ -1,0 +1,76 @@
+// a normal map phong style shader
+#version 410
+
+out vec4 FragColor;
+
+in vec4 vPosition;
+in vec3 vNormal;
+in vec2 vTexCoord;
+in vec3 vTangent;
+in vec3 vBiTangent;
+
+uniform sampler2D diffuseTexture;
+uniform sampler2D specularTexture;
+uniform sampler2D normalTexture;
+
+// For the light source
+uniform vec3 ambientLight; // Also seen as Ia
+uniform vec3 diffuseLight; // Also seen as Id
+uniform vec3 specularLight; // Also seen as Is
+
+uniform vec3 LightDirection;
+
+// Model material colors
+uniform vec3 Ka; // ambient material color
+uniform vec3 Kd; // diffuse material color
+uniform vec3 Ks; // specular materil color
+uniform float Ns; // Specular Power
+
+uniform vec4 CameraPosition;
+
+vec3 Diffuse(vec3 direction, vec3 color, vec3 normal)
+{
+    return color * max(0, dot(normal, -direction));
+}
+
+vec3 Specular(vec3 direction, vec3 color, vec3 normal, vec3 view)
+{
+    vec3 R = reflect(direction, normal);
+    float specularTerm = pow(max(0,dot(R, view)), Ns); 
+
+    return specularTerm * color;
+}
+
+void main()
+{
+    vec3 N = normalize(vNormal);
+    vec3 T = normalize(vTangent);
+    vec3 B = normalize(vBiTangent);
+    vec3 L = normalize(LightDirection);
+
+    mat3 TBN = mat3(T,B,N);
+
+    vec3 texDiffuse = texture(diffuseTexture, vTexCoord).rgb;
+    vec3 texSpecular = texture(specularTexture, vTexCoord).rgb;
+    vec3 texNormal = texture(normalTexture, vTexCoord).rgb;
+
+    N = normalize(TBN * (texNormal * 2 - 1));
+
+    // Calculate the lamber term (this is ther negaive light direction)
+    float lamberTerm = max(0, min(1, dot(N, -L)));
+
+    // Calculate the view vector 
+    vec3 V = normalize(CameraPosition.xyz - vPosition.xyz);
+    
+    // Calculate the reflectionvector
+    vec3 R = reflect(L,N);
+
+    vec3 specularTotal = Specular(L, specularLight, N, V);
+    vec3 diffuseTotal = Diffuse(vPosition.xyz - LightDirection, diffuseLight, N);    
+
+    vec3 ambient = ambientLight * Ka;
+    vec3 diffuse = Kd * texDiffuse * diffuseTotal;
+    vec3 specular = Ks * texSpecular * specularTotal;
+
+    FragColor = vec4(ambient + diffuse + specular, 1);
+}

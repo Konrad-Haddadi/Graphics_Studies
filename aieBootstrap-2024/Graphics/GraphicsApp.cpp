@@ -42,9 +42,10 @@ bool GraphicsApp::startup() {
 
 	showPlanets = false;
 
-	m_light.diffuse = { 1,.78f,.25f};
-	m_light.specular = { 1,.78f,.25f};
-	m_ambientLight = { 0.25f, 0.25f,0.25f };
+	m_light.diffuse = { .5f,.5f,.5f };
+	m_light.specular = { 1,1,1 };
+
+	m_ambientLight = { .3f,.3f,.3f }; 
 
 	m_quadTransform = {
 		10,0,0,0,
@@ -132,17 +133,54 @@ void GraphicsApp::draw() {
 
 	auto pv = m_projectionMatrix * m_viewMatrix;
 	
-	m_meatBoyTexture.bind();
-	m_meatBoyTexture.bindUniform("ProjectionViewModel", pv * m_meatBoyTransform); 
-	m_meatBoyTexture.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_meatBoyTransform)));
+	m_normalMapPhong.bind();
+	m_normalMapPhong.bindUniform("ProjectionViewModel", pv * m_spearTransform); 
+	m_normalMapPhong.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_spearTransform)));
+
+	m_normalMapPhong.bindUniform("diffuseTexture", 0);
+	m_normalMapPhong.bindUniform("specularTexture", 0);
+
+	m_normalMapPhong.bindUniform("CameraPosition", m_flyCamera.GetPosition());
+
+	m_normalMapPhong.bindUniform("LightDirection", m_light.direction);
+	m_normalMapPhong.bindUniform("ambientLight", m_ambientLight);
+	m_normalMapPhong.bindUniform("diffuseLight", m_light.diffuse);
+	m_normalMapPhong.bindUniform("specularLight", m_light.specular);
+	m_normalMapPhong.bindUniform("diffuseTexture", 0);
 	
-	m_meatBoyTexture.bindUniform("CameraPosition", m_flyCamera.GetPosition());
-	
-	m_meatBoyTexture.bindUniform("LightDirection", m_light.direction);
-	m_meatBoyTexture.bindUniform("ambientLight", m_ambientLight);
-	m_meatBoyTexture.bindUniform("diffuseLight", m_light.diffuse);
-	m_meatBoyTexture.bindUniform("specularLight", m_light.specular);
-	m_meatBoyMesh.draw();
+	m_spearMesh.draw();
+
+	/*m_meatBoyShader.bind();
+	m_meatBoyShader.bindUniform("ProjectionViewModel", pv * m_meatBoyTransform);
+	m_meatBoyShader.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_meatBoyTransform)));
+
+	m_meatBoyShader.bindUniform("diffuseTexture", 0);
+	m_meatBoyShader.bindUniform("specularTexture", 0);
+
+	m_meatBoyShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
+
+	m_meatBoyShader.bindUniform("LightDirection", m_light.direction);
+	m_meatBoyShader.bindUniform("ambientLight", m_ambientLight);
+	m_meatBoyShader.bindUniform("diffuseLight", m_light.diffuse);
+	m_meatBoyShader.bindUniform("specularLight", m_light.specular);
+	m_meatBoyShader.bindUniform("diffuseTexture", 0);
+
+	m_meatBoyMesh.draw();*/
+
+
+	/*m_texturedPhong.bind();
+	m_texturedPhong.bindUniform("ProjectionViewModel", pv * m_spearTransform);
+	m_texturedPhong.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_spearTransform)));
+
+	m_texturedPhong.bindUniform("CameraPosition", m_flyCamera.GetPosition());
+
+	m_texturedPhong.bindUniform("LightDirection", m_light.direction);
+	m_texturedPhong.bindUniform("ambientLight", m_ambientLight);
+	m_texturedPhong.bindUniform("diffuseLight", m_light.diffuse);
+	m_texturedPhong.bindUniform("specularLight", m_light.specular);
+	m_texturedPhong.bindUniform("diffuseTexture", 0);
+	m_spearTexture.bind(0);
+	m_spearMesh.draw(); */
 
 	/*m_simpleShader.bind();
 	m_simpleShader.bindUniform("ProjectionViewModel", pv * m_simpleTransform);
@@ -254,22 +292,27 @@ void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
 
 bool GraphicsApp::LaunchShaders()
 {
-	if (!LoadShaders(m_meatBoyTexture, "./shaders/texturedPhong.", "Textured Shader"))
+	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader"))
 		return false;
+
+	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 
 
 	/*if (!LoadShaders(m_simpleShader, "./shaders/color.", "Textured Shader"))
 		return false;*/
 
-	/*if (!LoadShaders(m_classicPhong, "./shaders/classicPhong.", "Textured Shader"))
-		return false;
+	/*if (!LoadShaders(m_texturedPhong, "./shaders/texturedPhong.", "Textured Shader"))
+		return false;*/
 
-	if(!LoadShaders(m_bunnyTexture, "./shaders/classicPhong.", "Classic Phong Shader"))
+	/*if (!LoadShaders(m_bunnyTexture, "./shaders/classicPhong.", "Classic Phong Shader"))
 		return false;*/
 
 	//ObjLoader(m_bunnyMesh, m_simpleTransform, "./stanford/Bunny.obj", "Bunny", true);
 
-	ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
-	//ObjLoader(m_dragonMesh, m_simpleTransform, "./stanford/Dragon.obj", "Dragon", true, 0.2f, {1.f,0.f,1.f});
+
+	/*if (!LoadShaders(m_meatBoyShader, "./shaders/normalMap.", "Textured and Normal Shader"))
+		return false;
+
+	ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "Meat Boy", true);*/
 	
 	return true;
 }

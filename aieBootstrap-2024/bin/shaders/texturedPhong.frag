@@ -43,7 +43,8 @@ void main()
     vec3 diffuse = diffuseLight * Kd * lamberTerm;
     vec3 specular = specularLight * Ks * specularTerm;
 
-    //(ambient + diffuse + specular);
-    // texture(diffuseTexture, vTexCoord) +
-    FragColor =  texture(diffuseTexture, vTexCoord) + (ambient + diffuse + specular, 1);
+    vec4 lighting = vec4(ambient + diffuse + specular, 1);
+    vec4 textureColour = texture(diffuseTexture, vTexCoord);
+
+    FragColor = textureColour;
 }
