@@ -78,6 +78,15 @@ void Mesh::InitialiseQuad()
 	vertices[4].position = { 0.5f,  0.f, 0.5f, 1 };
 	vertices[5].position = { 0.5f, 0.f, -0.5f, 1 };	
 	
+	// All nomrals point up
+	vertices[0].normal = { 0,1,0,0 };
+	vertices[1].normal = { 0,1,0,0 };
+	vertices[2].normal = { 0,1,0,0 };
+	
+	vertices[3].normal = { 0,1,0,0 };
+	vertices[4].normal = { 0,1,0,0 };
+	vertices[5].normal = { 0,1,0,0 };
+
 	vertices[0].texCoord = { 0,1 }; // Bottom Left;
 	vertices[1].texCoord = { 1,1 }; // Bottom Right;
 	vertices[2].texCoord = { 0,0 }; // Top Left;
@@ -87,12 +96,17 @@ void Mesh::InitialiseQuad()
 	vertices[5].texCoord = { 1,0 }; // Top Right;
 
 
+
 	// Fill vertex buffer
 	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), vertices, GL_STATIC_DRAW);
 
 	// Set the first element to be a position
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+
+	// Set the second elemen to be the normal
+	glDisableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex),(void*)16);
 
 	// Set the third element to be the texture coordinate
 	glEnableVertexAttribArray(2);
