@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <string>
 
 class BaseCamera;
 class Scene;
@@ -19,8 +20,12 @@ public:
 	~Instance();
 
 	void Draw(Scene* _scene);
+	void ImGUI_Functions(std::string _name, bool _canRemove = true);
 
 	static glm::mat4 MakeTransform(glm::vec3 _pos, glm::vec3 _angle, glm::vec3 _scale);
+
+public:
+	bool remove;
 
 protected:
 	glm::mat4 m_transform;

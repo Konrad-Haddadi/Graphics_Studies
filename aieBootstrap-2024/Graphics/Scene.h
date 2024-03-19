@@ -3,6 +3,8 @@
 #include <list>
 #include <vector>
 #include "Lights.h"
+#include "OBJMesh.h"
+#include "Shader.h"
 
 class BaseCamera;
 class Instance;
@@ -21,6 +23,8 @@ public:
 	void ImGUI_Functions();
 
 	void AddPointLights(Lights _light) { m_pointLights.push_back(_light); };
+	void AddShader(aie::ShaderProgram* _newShader) { m_currentShader.push_back(_newShader); }
+	void AddMesh(aie::OBJMesh* _newMesh) { m_currentMesh.push_back(_newMesh); }
 
 	BaseCamera* GetCamera() { return m_camera; }
 	glm::vec2 GetWindowSize() { return m_windowSize; }
@@ -31,13 +35,22 @@ public:
 
 	std::vector<Lights>& GetPointLights() { return m_pointLights; }
 	int GetNumberOfLights() { return m_pointLights.size(); }
+	int GetPostProcess() { return m_postProcess; }
 
 	glm::vec3* GetPointLightPositions() { return &m_pointLightPositions[0]; }
 	glm::vec3* GetPointLightColors() { return &m_pointLightColors[0]; }
 
+
+
 protected:
 
 	bool m_addLight;
+	bool m_addObject;
+	int m_postProcess;
+	
+	// Object 
+	std::vector<aie::ShaderProgram*> m_currentShader;
+	std::vector<aie::OBJMesh*> m_currentMesh;
 
 	BaseCamera* m_camera;
 	glm::vec2 m_windowSize;

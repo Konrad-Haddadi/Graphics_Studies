@@ -142,7 +142,7 @@ void GraphicsApp::draw() {
 
 	m_postProcess.bind();
 	m_postProcess.bindUniform("colorTarget", 0);
-	m_postProcess.bindUniform("postProcessTarget", 0);
+	m_postProcess.bindUniform("postProcessTarget", m_scene->GetPostProcess());
 	m_renderTarget.getTarget(0).bind(0);
 
 	m_screenQuad.Draw();
@@ -190,12 +190,14 @@ bool GraphicsApp::LaunchShaders()
 	// Load Mesh using Transform
 	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
 
-	
+	m_scene->AddMesh(&m_spearMesh);
+	m_scene->AddShader(&m_normalMapPhong);
+
 	// Creating Instances
-	for (int i = 0; i < 10; i++)
+	/*for (int i = 0; i < 0; i++)
 	{
 		m_scene->AddInstance(new Instance(glm::vec3(i * 2,0,0), glm::vec3(0, 0, 0), glm::vec3(1), &m_spearMesh, &m_normalMapPhong));
-	}
+	}*/
 	
 
 	return true;

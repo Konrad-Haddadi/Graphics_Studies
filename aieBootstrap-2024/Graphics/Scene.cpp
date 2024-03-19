@@ -3,6 +3,7 @@
 #include "Instance.h"
 #include <imgui_glfw3.h>
 #include <string>
+#include <vector>
 #include "Gizmos.h"
 #include "Lights.h"
 
@@ -10,6 +11,7 @@ Scene::Scene(BaseCamera* _camera, glm::vec2 _windowSize, Lights& _globalLight)
 	: m_camera(_camera), m_windowSize(_windowSize), m_globalLight(_globalLight)
 {
 	m_addLight = false;
+	m_postProcess = 0;
 }
 
 Scene::~Scene()
@@ -35,6 +37,13 @@ void Scene::Update(float _dt)
 		m_addLight = false;
 	}
 
+	if (m_addObject)
+	{
+		AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_currentMesh[0], m_currentShader[0]));
+		m_addObject = false;
+	}
+
+
 	// Last function in our Update;
 	ImGUI_Functions();
 }
@@ -58,11 +67,31 @@ void Scene::Draw()
 		if (m_pointLights[i].remove)
 			m_pointLights.erase(m_pointLights.begin() + i);
 	}
+		
+	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+	{
+		Instance* instance = *it;
+
+		if (!instance)
+		{
+			if (instance->remove)
+			{
+				m_instances.remove(instance);
+				delete instance;
+				instance = nullptr;
+			}
+		}		
+	}
+	
+	
 }
 
 void Scene::ImGUI_Functions()
 {
-	ImGui::Begin("Spear");	
+	ImGui::Begin("Lights");	
+
+	ImGui::InputInt("Set Post Process Val:", &m_postProcess);
+	ImGui::Text("");
 
 	ImGui::Checkbox("Add Light", &m_addLight);
 	
@@ -78,8 +107,24 @@ void Scene::ImGUI_Functions()
 		m_pointLights[i].ImGUI_Functions(name);
 	}
 
+	ImGui::End();
 	
+	ImGui::Begin("Objects");
 
+	ImGui::Checkbox("Add Object", &m_addObject);
+
+
+	int i = 0;
+	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+	{
+		Instance* instance = *it;
+		
+		std::string name = "Object ";
+		name += i + 1 + 48;
+
+		instance->ImGUI_Functions(name); 
+		i++;
+	}
 
 	ImGui::End();
 }
