@@ -17,7 +17,6 @@ void BaseCamera::CalculationUpdate(float _deltaTime)
 	float phiR = glm::radians(m_phi);
 
 	m_forward = vec3(glm::cos(phiR) * glm::cos(thetaR), glm::sin(phiR), glm::cos(phiR) * glm::sin(thetaR));
-
 	m_viewTransform = glm::lookAt(m_position, m_position + m_forward, glm::vec3(0, 1, 0));
 
 	Update(_deltaTime);

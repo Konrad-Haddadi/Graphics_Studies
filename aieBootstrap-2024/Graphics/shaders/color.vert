@@ -1,4 +1,4 @@
-// a simple shader
+// a simple colorable shader
 #version 410
 
 layout(location = 0) in vec4 Position;

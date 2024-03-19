@@ -34,7 +34,7 @@ public:
 protected:
 
 	bool LaunchShaders();
-	bool LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName);
+	bool LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, bool _addToScene = true);
 
 	bool ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename = " ", bool _flipTextures = false, float _scale = 1.f, glm::vec3 _position = { 0,0,0 });
 
@@ -51,10 +51,11 @@ protected:
 	glm::mat4	m_projectionMatrix;
 
 	aie::ShaderProgram m_simpleShader;
-	aie::ShaderProgram m_bunnyTexture;
+	aie::ShaderProgram m_normalMap;
 	aie::ShaderProgram m_simplePhong;
 	aie::ShaderProgram m_classicPhong;
 	aie::ShaderProgram m_texturedPhong;
+	aie::ShaderProgram m_normalMapPhong;
 	aie::ShaderProgram m_boundTexture;
 	aie::ShaderProgram m_postProcess;
 
@@ -98,7 +99,6 @@ protected:
 	glm::mat4 m_dragonTransform;
 
 	// Nomral Map Phong
-	aie::ShaderProgram m_normalMapPhong;
 
 	glm::mat4 m_quadTransform;
 	glm::mat4 m_boxTransform;

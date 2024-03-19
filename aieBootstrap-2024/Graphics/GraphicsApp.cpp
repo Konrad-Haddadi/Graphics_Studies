@@ -40,7 +40,11 @@ bool GraphicsApp::startup() {
 
 	// create simple camera transforms
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
+
+	float aspecitRatio = getWindowWidth() / getWindowHeight();
+
+	m_flyCamera.SetAspectRatio(getWindowWidth(), getWindowHeight());
+	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, aspecitRatio, 0.1f, 1000.0f);
 
 	SolarSystem(1);
 
@@ -70,6 +74,10 @@ void GraphicsApp::update(float deltaTime) {
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
+
+	float aspecitRatio = getWindowWidth() / getWindowHeight();
+
+	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, aspecitRatio, 0.1f, 1000.0f);
 
 	// draw a simple grid with gizmos
 	vec4 white(1);
@@ -167,8 +175,13 @@ bool GraphicsApp::LaunchShaders()
 	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader"))
 		return false;
 
-	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing"))
+	if (!LoadShaders(m_normalMap, "./shaders/normalMap.", "Normal Map"))
 		return false;
+
+	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing", false))
+		return false;
+
+
 
 	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
 	{
@@ -190,8 +203,7 @@ bool GraphicsApp::LaunchShaders()
 	// Load Mesh using Transform
 	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
 
-	m_scene->AddMesh(&m_spearMesh);
-	m_scene->AddShader(&m_normalMapPhong);
+	
 
 	// Creating Instances
 	/*for (int i = 0; i < 0; i++)
@@ -278,7 +290,7 @@ void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
 }
 
 
-bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName)
+bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, bool _addToScene)
 {
 	std::string vert = _filePath;
 	std::string frag = _filePath;
@@ -291,6 +303,9 @@ bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _fi
 		printf(_errorName.append("Shader Error: %s\n").c_str(), _shaderToLoad.getLastError());
 		return false;
 	}
+
+	if(_addToScene)
+		m_scene->AddShader(&_shaderToLoad, _errorName);
 
 	return true;
 }
@@ -309,6 +324,8 @@ bool GraphicsApp::ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, cons
 		0,0,_scale, 0,
 		_position.x, _position.y, _position.z, 1
 	};
+
+	m_scene->AddMesh(&__objMesh);
 
 	return false;
 }

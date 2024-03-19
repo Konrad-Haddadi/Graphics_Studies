@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <list>
 #include <vector>
+#include <string>
 #include "Lights.h"
 #include "OBJMesh.h"
 #include "Shader.h"
@@ -23,7 +24,7 @@ public:
 	void ImGUI_Functions();
 
 	void AddPointLights(Lights _light) { m_pointLights.push_back(_light); };
-	void AddShader(aie::ShaderProgram* _newShader) { m_currentShader.push_back(_newShader); }
+	void AddShader(aie::ShaderProgram* _newShader, std::string _name);
 	void AddMesh(aie::OBJMesh* _newMesh) { m_currentMesh.push_back(_newMesh); }
 
 	BaseCamera* GetCamera() { return m_camera; }
@@ -45,11 +46,15 @@ public:
 protected:
 
 	bool m_addLight;
-	bool m_addObject;
+	bool m_addObjects1;
+	bool m_addObjects2;
+	bool m_addObjects3;
+
 	int m_postProcess;
 	
 	// Object 
 	std::vector<aie::ShaderProgram*> m_currentShader;
+	std::vector<std::string> m_shaderNames;
 	std::vector<aie::OBJMesh*> m_currentMesh;
 
 	BaseCamera* m_camera;
