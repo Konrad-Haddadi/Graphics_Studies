@@ -28,6 +28,11 @@ uniform float Ns; // Specular Power
 
 uniform vec4 CameraPosition;
 
+const int MAX_LIGHTS = 4;
+uniform int NumberOfLights;
+uniform vec3 PointLightColors[MAX_LIGHTS];
+uniform vec3 PointLightPositions[MAX_LIGHTS];
+
 vec3 Diffuse(vec3 direction, vec3 color, vec3 normal)
 {
     return color * max(0, dot(normal, -direction));
@@ -65,10 +70,23 @@ void main()
     // Calculate the reflectionvector
     vec3 R = reflect(L,N);
 
-    vec3 specularTotal = Specular(L, specularLight, N, V);
-    vec3 diffuseTotal = Diffuse(vPosition.xyz - LightDirection, diffuseLight, N);    
+    vec3 specularTotal = Specular(vPosition.xyz- L, specularLight, N, V);
+    vec3 diffuseTotal = Diffuse(L, diffuseLight, N);    
 
-    vec3 ambient = ambientLight * Ka;
+    for(int i = 0; i < NumberOfLights; i++)
+    {
+        vec3 direction = vPosition.xyz - PointLightPositions[i];
+        float dist = length(direction);
+        direction = direction / dist;
+
+        // Use the inverse square law to set the intensity of the lights
+        vec3 color = PointLightColors[i] / (dist * dist);
+
+        diffuseTotal += Diffuse(direction, color, N);
+        specularTotal += Specular(direction, color, N, V);
+    }
+
+    vec3 ambient = ambientLight * Ka * texDiffuse;
     vec3 diffuse = Kd * texDiffuse * diffuseTotal;
     vec3 specular = Ks * texSpecular * specularTotal;
 

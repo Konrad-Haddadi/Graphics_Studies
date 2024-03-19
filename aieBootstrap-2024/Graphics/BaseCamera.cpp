@@ -28,6 +28,11 @@ mat4 BaseCamera::GetWorldTransform(vec3 cameraPosition, vec3 eularAngels, vec3 s
 	return mat4();
 }
 
+mat4 BaseCamera::GetProjectionMatrix(glm::vec2 _aspectRatio)
+{
+	return  glm::perspective(glm::pi<float>() * 0.25f, _aspectRatio.x / _aspectRatio.y, m_nearRender, m_farRender);
+}
+
 mat4 BaseCamera::GetProjectionMatrix()
 {
 	return  glm::perspective(glm::pi<float>() * 0.25f, m_aspectRatio, m_nearRender, m_farRender);

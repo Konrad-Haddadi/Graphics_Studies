@@ -13,6 +13,8 @@
 #include "Texture.h"
 #include "OBJMesh.h"
 
+class Scene;
+
 class GraphicsApp : public aie::Application {
 public:
 
@@ -29,7 +31,6 @@ public:
 	void SpawnSquare();
 	void SpawnCylinder(float _radius, float _height, int _segments);
 
-
 protected:
 
 	bool LaunchShaders();
@@ -41,6 +42,9 @@ protected:
 
 	bool showPlanets;
 
+	Scene* m_scene;
+
+
 	// camera transforms
 	glm::mat4	m_viewMatrix;
 	glm::mat4	m_projectionMatrix;
@@ -51,13 +55,17 @@ protected:
 	aie::ShaderProgram m_classicPhong;
 	aie::ShaderProgram m_texturedPhong;
 
-	struct Light {
+	struct BasicLight {
 		glm::vec3 direction;
 		glm::vec3 diffuse;
 		glm::vec3 specular;
 	};
 
-	Light m_light;
+	BasicLight m_light;
+	float m_diffuseMultiplier;
+	float m_directionMultiplier;
+	float m_specularMultiplier;
+
 	glm::vec3 m_ambientLight;
 
 	// Simple Mesh
@@ -94,5 +102,4 @@ protected:
 	FlyCamera m_flyCamera;
 	StationaryCamera m_stationaryCamera;
 	OrbitalCamera m_orbitingCamera;
-
 };

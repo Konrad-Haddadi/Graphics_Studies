@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <list>
+#include "Scene.h"
+#include "Instance.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -21,6 +23,7 @@ BaseCamera* bc = nullptr;
 
 GraphicsApp::GraphicsApp() 
 {
+	
 }
 
 GraphicsApp::~GraphicsApp() {
@@ -42,32 +45,24 @@ bool GraphicsApp::startup() {
 
 	showPlanets = false;
 
-	m_light.diffuse = { .5f,.5f,.5f };
-	m_light.specular = { 1,1,1 };
+	bc = &m_flyCamera;
 
-	m_ambientLight = { .3f,.3f,.3f }; 
+	Light globalLight;
 
-	m_quadTransform = {
-		10,0,0,0,
-		0,10,0,0,
-		0,0,10,0,
-		0,0,0,1
+	globalLight.color = { 1,1,1 };
+	globalLight.direction = { 1, -1, 1 };
+
+	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), globalLight);
+	m_scene->GetPointLights().push_back(Light(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50.f));
+	m_scene->GetPointLights().push_back(Light(glm::vec3(-5, 3, 0), glm::vec3(0, 1, 0), 50.f));
 	
-	};
-
-	m_simpleTransform = {
-		.01,0,0,0,
-		0,.01,0,0,
-		0,0,.01,0,
-		0,0,0,1
-	};
-
 	return LaunchShaders();
 }
 
 void GraphicsApp::shutdown() {
 
 	Gizmos::destroy();
+	delete m_scene;
 }
 
 void GraphicsApp::update(float deltaTime) {
@@ -89,12 +84,8 @@ void GraphicsApp::update(float deltaTime) {
 
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
-	bc = &m_flyCamera;
 
-	bc->CalculationUpdate(deltaTime);
-
-	float time = getTime();
-	m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
+	m_scene->Update(deltaTime);
 
 	// custom function
 	if (showPlanets)
@@ -108,8 +99,6 @@ void GraphicsApp::update(float deltaTime) {
 
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
-
-	ImGUI_Helper();
 }
 
 void GraphicsApp::draw() {
@@ -126,83 +115,13 @@ void GraphicsApp::draw() {
 	}
 
 	// update perspective based on screen size
-	// m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
 
 	m_viewMatrix = bc->GetViewMatrix();
 	m_projectionMatrix = bc->GetProjectionMatrix();
 
 	auto pv = m_projectionMatrix * m_viewMatrix;
 	
-	m_normalMapPhong.bind();
-	m_normalMapPhong.bindUniform("ProjectionViewModel", pv * m_spearTransform); 
-	m_normalMapPhong.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_spearTransform)));
-
-	m_normalMapPhong.bindUniform("diffuseTexture", 0);
-	m_normalMapPhong.bindUniform("specularTexture", 0);
-
-	m_normalMapPhong.bindUniform("CameraPosition", m_flyCamera.GetPosition());
-
-	m_normalMapPhong.bindUniform("LightDirection", m_light.direction);
-	m_normalMapPhong.bindUniform("ambientLight", m_ambientLight);
-	m_normalMapPhong.bindUniform("diffuseLight", m_light.diffuse);
-	m_normalMapPhong.bindUniform("specularLight", m_light.specular);
-	m_normalMapPhong.bindUniform("diffuseTexture", 0);
-	
-	m_spearMesh.draw();
-
-	/*m_meatBoyShader.bind();
-	m_meatBoyShader.bindUniform("ProjectionViewModel", pv * m_meatBoyTransform);
-	m_meatBoyShader.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_meatBoyTransform)));
-
-	m_meatBoyShader.bindUniform("diffuseTexture", 0);
-	m_meatBoyShader.bindUniform("specularTexture", 0);
-
-	m_meatBoyShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
-
-	m_meatBoyShader.bindUniform("LightDirection", m_light.direction);
-	m_meatBoyShader.bindUniform("ambientLight", m_ambientLight);
-	m_meatBoyShader.bindUniform("diffuseLight", m_light.diffuse);
-	m_meatBoyShader.bindUniform("specularLight", m_light.specular);
-	m_meatBoyShader.bindUniform("diffuseTexture", 0);
-
-	m_meatBoyMesh.draw();*/
-
-
-	/*m_texturedPhong.bind();
-	m_texturedPhong.bindUniform("ProjectionViewModel", pv * m_spearTransform);
-	m_texturedPhong.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_spearTransform)));
-
-	m_texturedPhong.bindUniform("CameraPosition", m_flyCamera.GetPosition());
-
-	m_texturedPhong.bindUniform("LightDirection", m_light.direction);
-	m_texturedPhong.bindUniform("ambientLight", m_ambientLight);
-	m_texturedPhong.bindUniform("diffuseLight", m_light.diffuse);
-	m_texturedPhong.bindUniform("specularLight", m_light.specular);
-	m_texturedPhong.bindUniform("diffuseTexture", 0);
-	m_spearTexture.bind(0);
-	m_spearMesh.draw(); */
-
-	/*m_simpleShader.bind();
-	m_simpleShader.bindUniform("ProjectionViewModel", pv * m_simpleTransform);
-	m_dragonMesh.draw();*/
-
-
-//#pragma region Classic Phong
-//	m_bunnyTexture.bind();
-//	m_bunnyTexture.bindUniform("ProjectionViewModel", pv * m_simpleTransform);
-//	m_bunnyTexture.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_simpleTransform)));
-//
-//	m_bunnyTexture.bindUniform("CameraPosition", m_flyCamera.GetPosition());
-//
-//	m_bunnyTexture.bindUniform("LightDirection", m_light.direction);
-//	m_bunnyTexture.bindUniform("ambientLight", m_ambientLight);
-//	m_bunnyTexture.bindUniform("diffuseLight", m_light.diffuse);
-//	m_bunnyTexture.bindUniform("specularLight", m_light.specular);
-//
-//	m_bunnyMesh.draw();
-//
-//#pragma endregion	
-
+	m_scene->Draw();
 	Gizmos::draw(pv);
 }
 
@@ -292,28 +211,21 @@ void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
 
 bool GraphicsApp::LaunchShaders()
 {
+	// Loading Shaders
 	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader"))
 		return false;
 
-	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 
 
-	/*if (!LoadShaders(m_simpleShader, "./shaders/color.", "Textured Shader"))
-		return false;*/
-
-	/*if (!LoadShaders(m_texturedPhong, "./shaders/texturedPhong.", "Textured Shader"))
-		return false;*/
-
-	/*if (!LoadShaders(m_bunnyTexture, "./shaders/classicPhong.", "Classic Phong Shader"))
-		return false;*/
-
-	//ObjLoader(m_bunnyMesh, m_simpleTransform, "./stanford/Bunny.obj", "Bunny", true);
+	// Load Mesh using Transform
+	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
 
 
-	/*if (!LoadShaders(m_meatBoyShader, "./shaders/normalMap.", "Textured and Normal Shader"))
-		return false;
+	// Creating Instances
+	for (int i = 0; i < 10; i++)
+	{
+		m_scene->AddInstance(new Instance(glm::vec3(i * 2,0,0), glm::vec3(0, i * 30, 0), glm::vec3(1), &m_spearMesh, &m_normalMapPhong));
+	}
 
-	ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "Meat Boy", true);*/
-	
 	return true;
 }
 

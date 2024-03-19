@@ -21,6 +21,7 @@ public:
 	mat4 GetWorldTransform(vec3 cameraPosition, vec3 eularAngels, vec3 scale);
 	mat4 GetProjectionViewMatrix() { return m_projectViewTransform; }
 	mat4 GetProjectionMatrix();
+	mat4 GetProjectionMatrix(glm::vec2 _aspectRatio);
 	mat4 GetViewMatrix() { return m_viewTransform; }
 
 	float GetAspectRatio() { return m_aspectRatio; }
