@@ -120,6 +120,49 @@ void Mesh::InitialiseQuad()
 	m_triCount = 2;
 }
 
+void Mesh::InitialiseFullScreenQuad()
+{
+	// check that the mesh is not initialized aleady
+	assert(m_vao == 0);
+
+	// generate bffers
+	glGenBuffers(1, &m_vbo);
+	glGenVertexArrays(1, &m_vao);
+
+	// bind vertext array aka a mesh wrapper
+	glBindVertexArray(m_vao);
+
+	// bind vertext buffer
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+	// Define the 6 vertices for 2 triangles
+
+	float vertices[] = {
+
+	   -1, 1, // Left Top
+	   -1,-1, // Left Bottom
+		1, 1, // Right Top
+	   
+		-1,-1, // Left Bottom
+		1,-1, // Right Bottom
+		1, 1  // Right top
+	};
+	
+	// Fill vertex buffer
+	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertices, GL_STATIC_DRAW);
+
+	// Set the first element to be a position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8, 0);
+
+	// Unbind buffers
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// Set the Tri count
+	m_triCount = 2;
+}
+
 void Mesh::Draw()
 {
 	glBindVertexArray(m_vao);

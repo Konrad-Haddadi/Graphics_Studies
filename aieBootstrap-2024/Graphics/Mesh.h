@@ -17,6 +17,7 @@ public:
 
 	void Initialise(unsigned int _vertexCount, const Vertex* _vertices, unsigned int _indexCount = 0, unsigned int* _indices = nullptr);
 	void InitialiseQuad();
+	void InitialiseFullScreenQuad();
 	virtual void Draw();
 
 protected:

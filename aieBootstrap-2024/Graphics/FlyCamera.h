@@ -10,7 +10,7 @@ public:
 	void SetSpeed(float _speed) { m_speed = _speed; }
 
 private:
-	float m_speed = glm::radians(180.f);
+	float m_speed = glm::radians(360.f);
 	vec3 m_up = vec3(0,1,0);
 };
 

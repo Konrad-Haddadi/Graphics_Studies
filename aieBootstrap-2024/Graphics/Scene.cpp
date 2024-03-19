@@ -4,10 +4,12 @@
 #include <imgui_glfw3.h>
 #include <string>
 #include "Gizmos.h"
-Scene::Scene(BaseCamera* _camera, glm::vec2 _windowSize, Light& _globalLight)
+#include "Lights.h"
+
+Scene::Scene(BaseCamera* _camera, glm::vec2 _windowSize, Lights& _globalLight)
 	: m_camera(_camera), m_windowSize(_windowSize), m_globalLight(_globalLight)
 {
-	
+	m_addLight = false;
 }
 
 Scene::~Scene()
@@ -27,6 +29,12 @@ void Scene::Update(float _dt)
 {
 	m_camera->CalculationUpdate(_dt);
 
+	if (m_addLight)
+	{
+		GetPointLights().push_back(Lights(glm::vec3(0, 2, 0), glm::vec3(1, 1, 1), 10.f));
+		m_addLight = false;
+	}
+
 	// Last function in our Update;
 	ImGUI_Functions();
 }
@@ -43,6 +51,12 @@ void Scene::Draw()
 	{
 		Instance* instance = *it;
 		instance->Draw(this);
+	}	
+
+	for (int i = 0; i < MAX_LIGHTS && i < GetNumberOfLights(); i++)
+	{
+		if (m_pointLights[i].remove)
+			m_pointLights.erase(m_pointLights.begin() + i);
 	}
 }
 
@@ -50,29 +64,22 @@ void Scene::ImGUI_Functions()
 {
 	ImGui::Begin("Spear");	
 
+	ImGui::Checkbox("Add Light", &m_addLight);
+	
+	ImGui::Text("");
+
+	m_globalLight.ImGUI_Functions("Global", false);
+
 	for (int i = 0; i < m_pointLights.size(); i++)
 	{
-		Light light = m_pointLights[i];
-
 		std::string name = "Light ";
-		name += i + 1 + 48;		
-		ImGui::Text(name.c_str());
+		name += i + 1 + 48;
 
-		name += ": ";
-
-		std::string nameColor = name + "Color";
-		std::string namePos = name + "Position";
-		std::string nameIntensity = name + "Intensity";
-
-		ImGui::SliderFloat3(nameColor.c_str(), &light.color.x, 0, 1);
-		ImGui::SliderFloat3(namePos.c_str() , &light.direction.x, -10, 10);
-		ImGui::SliderFloat(nameIntensity.c_str() , &light.intensity, 0, 50);
-		m_pointLights[i] = light;
-
-		aie::Gizmos::addSphere(light.direction , light.intensity / 50, 10, 10, glm::vec4(light.color.x, light.color.y, light.color.z, light.intensity));
+		m_pointLights[i].ImGUI_Functions(name);
 	}
+
 	
-	
+
 
 	ImGui::End();
 }

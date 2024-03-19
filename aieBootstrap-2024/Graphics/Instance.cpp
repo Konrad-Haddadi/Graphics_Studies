@@ -25,13 +25,13 @@ Instance::~Instance()
 void Instance::Draw(Scene* _scene)
 {
 	BaseCamera* bc = _scene->GetCamera();
-	Light lights = _scene->GetGlobalLight();
+	Lights lights = _scene->GetGlobalLight();
 	
 	auto pv = bc->GetProjectionMatrix(_scene->GetWindowSize()) * bc->GetViewMatrix();
 
 	m_shader->bind();
 	m_shader->bindUniform("ProjectionViewModel", pv * m_transform);
-	m_shader->bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_transform)));
+	m_shader->bindUniform("ModelMatrix", m_transform);
 			
 	m_shader->bindUniform("diffuseTexture", 0);
 	m_shader->bindUniform("specularTexture", 0);

@@ -45,6 +45,7 @@ protected:
 	Scene* m_scene;
 
 
+	aie::RenderTarget m_renderTarget;
 	// camera transforms
 	glm::mat4	m_viewMatrix;
 	glm::mat4	m_projectionMatrix;
@@ -54,6 +55,8 @@ protected:
 	aie::ShaderProgram m_simplePhong;
 	aie::ShaderProgram m_classicPhong;
 	aie::ShaderProgram m_texturedPhong;
+	aie::ShaderProgram m_boundTexture;
+	aie::ShaderProgram m_postProcess;
 
 	struct BasicLight {
 		glm::vec3 direction;
@@ -72,6 +75,7 @@ protected:
 	Mesh m_quadMesh;
 	Mesh m_boxMesh;
 	Mesh m_phongMesh;
+	Mesh m_screenQuad;
 	aie::Texture m_gridTexture;
 
 	// Spear mesh

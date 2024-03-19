@@ -4,6 +4,7 @@
 #include "Planet.h"
 #include "FlyCamera.h"
 #include "BaseCamera.h"
+#include "Lights.h"
 
 #include <imgui_glfw3.h>
 #include <glm/glm.hpp>
@@ -47,14 +48,14 @@ bool GraphicsApp::startup() {
 
 	bc = &m_flyCamera;
 
-	Light globalLight;
+	Lights globalLight;
 
 	globalLight.color = { 1,1,1 };
 	globalLight.direction = { 1, -1, 1 };
 
 	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), globalLight);
-	m_scene->GetPointLights().push_back(Light(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50.f));
-	m_scene->GetPointLights().push_back(Light(glm::vec3(-5, 3, 0), glm::vec3(0, 1, 0), 50.f));
+	m_scene->GetPointLights().push_back(Lights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50.f));
+	m_scene->GetPointLights().push_back(Lights(glm::vec3(-5, 3, 0), glm::vec3(0, 1, 0), 50.f));
 	
 	return LaunchShaders();
 }
@@ -103,6 +104,10 @@ void GraphicsApp::update(float deltaTime) {
 
 void GraphicsApp::draw() {
 
+	// Bind to the render target
+	//m_renderTarget.bind();
+
+
 	// wipe the screen to the background colour
 	clearScreen();
 
@@ -119,10 +124,29 @@ void GraphicsApp::draw() {
 	m_viewMatrix = bc->GetViewMatrix();
 	m_projectionMatrix = bc->GetProjectionMatrix();
 
-	auto pv = m_projectionMatrix * m_viewMatrix;
+	auto pv = m_projectionMatrix * m_viewMatrix;	
 	
 	m_scene->Draw();
+
+	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, float(getWindowWidth() / getWindowHeight()), 0.1f, 1000.0f);
+
+
 	Gizmos::draw(pv);
+
+
+	// Unbind the target from the backbuffer
+
+	//m_renderTarget.unbind();
+
+	//// Clear the back buffer
+	//clearScreen();
+
+	//m_postProcess.bind();
+	//m_postProcess.bindUniform("colorTarget", 0);
+	//m_postProcess.bindUniform("postProcessTarget", 0);
+	//m_renderTarget.getTarget(0).bind(0);
+
+	//m_screenQuad.Draw();
 }
 
 void GraphicsApp::ImGUI_Helper()
@@ -133,6 +157,53 @@ void GraphicsApp::ImGUI_Helper()
 	ImGui::Checkbox("Show Planets", &showPlanets);
 
 	ImGui::End();
+}
+
+bool GraphicsApp::LaunchShaders()
+{
+	// Loading Shaders
+	if (!LoadShaders(m_boundTexture, "./shaders/textured.", "Textured"))
+		return false;
+
+	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader"))
+		return false;
+
+	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing"))
+		return false;
+
+
+
+
+	// Load Mesh using Transform
+	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
+
+
+	// Creating Instances
+	for (int i = 0; i < 10; i++)
+	{
+		m_scene->AddInstance(new Instance(glm::vec3(i * 2,0,0), glm::vec3(0, 0, 0), glm::vec3(1), &m_spearMesh, &m_normalMapPhong));
+	}
+
+
+	
+
+	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
+	{
+		printf("Render Target has an error!!\n");
+		return false;
+	}
+
+	m_quadMesh.InitialiseQuad();
+	m_screenQuad.InitialiseFullScreenQuad();
+
+	m_quadTransform = {
+		10,0,0,0,
+		0,10,0,0,
+		0,0,10,0,
+		0,0,0,1
+	};
+
+	return true;
 }
 
 void GraphicsApp::SpawnCube()
@@ -209,25 +280,6 @@ void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
 	//m_boxMesh.Initialise(8, vertices, 38, indices);
 }
 
-bool GraphicsApp::LaunchShaders()
-{
-	// Loading Shaders
-	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader"))
-		return false;
-
-
-	// Load Mesh using Transform
-	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
-
-
-	// Creating Instances
-	for (int i = 0; i < 10; i++)
-	{
-		m_scene->AddInstance(new Instance(glm::vec3(i * 2,0,0), glm::vec3(0, i * 30, 0), glm::vec3(1), &m_spearMesh, &m_normalMapPhong));
-	}
-
-	return true;
-}
 
 bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName)
 {

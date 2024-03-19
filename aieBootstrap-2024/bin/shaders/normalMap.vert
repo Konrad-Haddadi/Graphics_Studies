@@ -17,15 +17,15 @@ out vec3 vBiTangent;
 uniform mat4 ModelMatrix;
 
 //This will provide the normals of the mesh
-uniform mat3 NormalMatrix;
+//uniform mat3 NormalMatrix;
 
 void main()
 {
     vPosition = ModelMatrix * Position;
-    vNormal = NormalMatrix * Normal.xyz;
+    vNormal = (ModelMatrix * Normal).xyz;
     vTexCoord = TexCoord;
 
-    vTangent = NormalMatrix * Tangent.xyz;
+    vTangent = (ModelMatrix * Tangent).xyz;
     vBiTangent = cross(vNormal, vTangent) * Tangent.w;
 
     gl_Position = ProjectionViewModel * Position;
