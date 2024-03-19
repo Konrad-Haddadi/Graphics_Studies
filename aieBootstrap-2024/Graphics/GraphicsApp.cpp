@@ -105,7 +105,7 @@ void GraphicsApp::update(float deltaTime) {
 void GraphicsApp::draw() {
 
 	// Bind to the render target
-	//m_renderTarget.bind();
+	m_renderTarget.bind();
 
 
 	// wipe the screen to the background colour
@@ -124,10 +124,9 @@ void GraphicsApp::draw() {
 	m_viewMatrix = bc->GetViewMatrix();
 	m_projectionMatrix = bc->GetProjectionMatrix();
 
-	auto pv = m_projectionMatrix * m_viewMatrix;	
-	
 	m_scene->Draw();
 
+	auto pv = m_projectionMatrix * m_viewMatrix;	
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, float(getWindowWidth() / getWindowHeight()), 0.1f, 1000.0f);
 
 
@@ -136,17 +135,17 @@ void GraphicsApp::draw() {
 
 	// Unbind the target from the backbuffer
 
-	//m_renderTarget.unbind();
+	m_renderTarget.unbind();
 
-	//// Clear the back buffer
-	//clearScreen();
+	// Clear the back buffer
+	clearScreen();
 
-	//m_postProcess.bind();
-	//m_postProcess.bindUniform("colorTarget", 0);
-	//m_postProcess.bindUniform("postProcessTarget", 0);
-	//m_renderTarget.getTarget(0).bind(0);
+	m_postProcess.bind();
+	m_postProcess.bindUniform("colorTarget", 0);
+	m_postProcess.bindUniform("postProcessTarget", 0);
+	m_renderTarget.getTarget(0).bind(0);
 
-	//m_screenQuad.Draw();
+	m_screenQuad.Draw();
 }
 
 void GraphicsApp::ImGUI_Helper()
@@ -171,22 +170,6 @@ bool GraphicsApp::LaunchShaders()
 	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing"))
 		return false;
 
-
-
-
-	// Load Mesh using Transform
-	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
-
-
-	// Creating Instances
-	for (int i = 0; i < 10; i++)
-	{
-		m_scene->AddInstance(new Instance(glm::vec3(i * 2,0,0), glm::vec3(0, 0, 0), glm::vec3(1), &m_spearMesh, &m_normalMapPhong));
-	}
-
-
-	
-
 	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
 	{
 		printf("Render Target has an error!!\n");
@@ -202,6 +185,18 @@ bool GraphicsApp::LaunchShaders()
 		0,0,10,0,
 		0,0,0,1
 	};
+
+
+	// Load Mesh using Transform
+	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
+
+	
+	// Creating Instances
+	for (int i = 0; i < 10; i++)
+	{
+		m_scene->AddInstance(new Instance(glm::vec3(i * 2,0,0), glm::vec3(0, 0, 0), glm::vec3(1), &m_spearMesh, &m_normalMapPhong));
+	}
+	
 
 	return true;
 }
