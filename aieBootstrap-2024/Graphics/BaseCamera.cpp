@@ -39,10 +39,19 @@ mat4 BaseCamera::GetProjectionMatrix()
 
 void BaseCamera::SetViewMatrix(vec3 from, vec3 to, vec3 up)
 {
+	m_viewTransform = glm::lookAt(from, to, up);
 }
 
-void BaseCamera::SetProjectionMatrix(float fieldOfView, float aspectRatio, float, float)
+void BaseCamera::SetCenter(vec3 center)
 {
+	m_viewTransform = glm::lookAt(m_position, center, glm::vec3(0,1,0));
+}
+
+void BaseCamera::SetProjectionMatrix(float fieldOfView, float aspectRatio, float _nearRender, float _farRender)
+{	
+	m_aspectRatio = aspectRatio;
+	m_nearRender = _nearRender;
+	m_farRender = _farRender;	
 }
 
 void BaseCamera::SetProjectionMatrix(float fieldOfView, float width, float height, float, float)

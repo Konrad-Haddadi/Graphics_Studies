@@ -29,9 +29,9 @@ public:
 	void SetPosition(vec3 position) { m_position = position; }
 	void SetAspectRatio(float width, float height) { m_aspectRatio = width / height; }
 	void SetViewMatrix(vec3 from, vec3 to, vec3 up);
-	void SetProjectionMatrix(float fieldOfView, float aspectRatio, float near, float far);
-	void SetProjectionMatrix(float fieldOfView, float width, float height, float near, float far);
-
+	void SetProjectionMatrix(float fieldOfView, float aspectRatio, float _nearRender, float _farRender);
+	void SetProjectionMatrix(float fieldOfView, float width, float height, float _nearRender, float _farRender);
+	void SetCenter(vec3 center);
 protected:
 	mat4 m_projectViewTransform;
 	mat4 m_worldTransform;

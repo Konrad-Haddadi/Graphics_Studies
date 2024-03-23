@@ -9,13 +9,13 @@
 #include <imgui_glfw3.h>
 #include <string>
 
-Instance::Instance(glm::mat4 _transform, aie::OBJMesh* _mesh, aie::ShaderProgram* _shader, bool _isUntextured)
-	: m_transform(_transform), m_mesh(_mesh), m_shader(_shader), m_isUntextured(_isUntextured), remove(false)
+Instance::Instance(glm::mat4 _transform, aie::OBJMesh* _mesh, aie::ShaderProgram* _shader, std::string _name, bool _invertLightDir, bool _isUntextured)
+	: m_transform(_transform), m_mesh(_mesh), m_shader(_shader), m_isUntextured(_isUntextured), name(_name), m_invertLight(_invertLightDir) , remove(false), layerSample(0)
 {
 }
 
-Instance::Instance(glm::vec3 _pos, glm::vec3 _eulerAngels, glm::vec3 _scale, aie::OBJMesh* _mesh, aie::ShaderProgram* _shader, bool _isUntextured)
-	: m_mesh(_mesh), m_shader(_shader), m_isUntextured(_isUntextured), remove(false)
+Instance::Instance(glm::vec3 _pos, glm::vec3 _eulerAngels, glm::vec3 _scale, aie::OBJMesh* _mesh, aie::ShaderProgram* _shader, std::string _name, bool _invertLightDir, bool _isUntextured)
+	: m_mesh(_mesh), m_shader(_shader), m_isUntextured(_isUntextured), name(_name), m_invertLight(_invertLightDir), remove(false), layerSample(0)
 {
 	m_transform = Instance::MakeTransform(_pos, _eulerAngels, _scale);
 }
@@ -27,7 +27,6 @@ Instance::~Instance()
 void Instance::Draw(Scene* _scene)
 {
 	BaseCamera* bc = _scene->GetCamera();
-	Lights lights = _scene->GetGlobalLight();
 	
 	auto pv = bc->GetProjectionMatrix(_scene->GetWindowSize()) * bc->GetViewMatrix();
 
@@ -35,6 +34,8 @@ void Instance::Draw(Scene* _scene)
 	m_shader->bindUniform("ProjectionViewModel", pv * m_transform);
 	m_shader->bindUniform("ModelMatrix", m_transform);
 			
+	m_shader->bindUniform("layerSample", layerSample);
+
 	m_shader->bindUniform("diffuseTexture", 0);
 	m_shader->bindUniform("specularTexture", 0);
 	m_shader->bindUniform("normalTexture", 0);
@@ -55,28 +56,71 @@ void Instance::Draw(Scene* _scene)
 	m_mesh->draw();
 }
 
-void Instance::ImGUI_Functions(std::string _name, bool _canRemove)
+void Instance::ImGUI_Functions(std::string _addToName, bool _canRemove)
 {
-	std::string name = _name;
-
 	ImGui::Text(name.c_str());
 
-	name += ": ";
+	std::string nameAdd = name + _addToName + ": ";
 
-	std::string nameColor = name + "Color";
-	std::string namePos = name + "Position";
-	std::string nameIntensity = name + "Intensity";
+	std::string nameLayer = nameAdd + "Layer";
+	std::string nameColor = nameAdd + "Color";
+	std::string nameMove = nameAdd + "Move Pos";
+	std::string namePos = nameAdd + "Position";
+	std::string nameRot = nameAdd + "Rotation";
+	std::string nameScale = nameAdd + "Scale";
+	std::string nameScaleOverAll = nameAdd + "Scale Setter";
 
 	if (_canRemove)
 	{
-		std::string nameRemove = "Remove " + name;
+		std::string nameRemove = "Remove " + nameAdd;
 		ImGui::Checkbox(nameRemove.c_str(), &remove);
 	}
 
-	glm::vec4* pos = &m_transform[3];
+	ImGui::InputInt(nameLayer.c_str(), &layerSample);
 
-	ImGui::SliderFloat3(namePos.c_str(), &pos->x, -50, 50);
+	if (layerSample > 4)
+		layerSample = 0;
+
+	if (layerSample < 0)
+		layerSample = 4;
+
+
+	ImGui::Text("");
+
+	float scaleSetter = 0;
+
+	glm::vec3 pos = glm::vec3(0);
+	glm::vec3 rot = glm::vec3(0);
+	glm::vec3 scale = glm::vec3(1);
+
+	glm::vec3 newPos = m_transform[3];
+	glm::vec3 oldPos = m_transform[3];
+
+	ImGui::InputFloat3(namePos.c_str(), &newPos.x, 0);
+
+	if(newPos != oldPos)
+		m_transform = glm::translate(glm::mat4(1), newPos);
+
+
+	ImGui::SliderFloat3(nameMove.c_str(), &pos.x, -1, 1);
+	ImGui::SliderFloat3(nameRot.c_str(), &rot.x, -1, 1);
+	ImGui::SliderFloat3(nameScale.c_str(), &scale.x, 0.9f, 1.1f);
+
+	ImGui::InputFloat(nameScaleOverAll.c_str(), &scaleSetter);
 	ImGui::Text(" ");
+
+	pos = pos * 0.1f;
+
+	m_transform *= glm::translate(glm::mat4(1), pos);
+
+	m_transform *= glm::rotate(glm::mat4(1), glm::radians(rot.z), glm::vec3(0, 0, 1)) *
+		glm::rotate(glm::mat4(1), glm::radians(rot.y), glm::vec3(0, 1, 0)) *
+		glm::rotate(glm::mat4(1), glm::radians(rot.x), glm::vec3(1, 0, 0));
+
+	m_transform *= glm::scale(glm::mat4(1), scale);
+
+	if(scaleSetter != 0)
+		m_transform = glm::scale(glm::mat4(1), glm::vec3(scaleSetter));	
 }
 
 glm::mat4 Instance::MakeTransform(glm::vec3 _pos, glm::vec3 _angle, glm::vec3 _scale)

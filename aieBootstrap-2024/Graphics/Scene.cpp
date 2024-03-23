@@ -4,6 +4,7 @@
 #include <imgui_glfw3.h>
 #include <string>
 #include <vector>
+#include <map>
 #include "Gizmos.h"
 #include "Lights.h"
 
@@ -14,8 +15,8 @@ Scene::Scene(BaseCamera* _camera, glm::vec2 _windowSize, Lights& _globalLight)
 	m_postProcess = 0;
 
 	m_addObjects1 = false;
-	m_addObjects2 = false;
-	m_addObjects3 = false;
+	
+	openMenu = false;
 }
 
 Scene::~Scene()
@@ -37,40 +38,30 @@ void Scene::Update(float _dt)
 
 	if (m_addLight)
 	{
-		GetPointLights().push_back(Lights(glm::vec3(0, 2, 0), glm::vec3(1, 1, 1), 10.f));
+		if(m_pointLights.size() < 4)
+			GetPointLights().push_back(Lights(glm::vec3(0, 2, 0), glm::vec3(1, 1, 1), 10.f));
+
 		m_addLight = false;
 	}
 
-	/*for (int i = 0; i < m_currentMesh.size(); i++)
-	{	
-		if (m_addObjects[i])
+	std::map<std::string, bool>::iterator it = m_objects.begin();
+
+	int meshCount = m_objects.size() - 1;
+
+	while (it != m_objects.end())
+	{
+		if (m_objects.at(it->first))
 		{
-			AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_currentMesh[0], m_currentShader[i]));
-			m_addObjects[i] = false;			
+			AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_currentMesh[meshCount], m_currentShader[0], it->first));
+			m_objects.at(it->first) = false;
 		}
-	}*/
 
-	if (m_addObjects1)
-	{
-		AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_currentMesh[0], m_currentShader[0]));
-		m_addObjects1 = false;
+		it++;
+		meshCount--;
 	}
-
-	if (m_addObjects2)
-	{
-		AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_currentMesh[0], m_currentShader[1]));
-		m_addObjects2 = false;
-	}
-
-	if (m_addObjects3)
-	{
-		AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_currentMesh[0], m_currentShader[2]));
-		m_addObjects3 = false;
-	}
-	
 
 	// Last function in our Update;
-	ImGUI_Functions();
+	
 
 	for (int i = 0; i < MAX_LIGHTS && i < GetNumberOfLights(); i++)
 	{
@@ -109,18 +100,33 @@ void Scene::Draw()
 	}	
 }
 
-void Scene::ImGUI_Functions()
+void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 {
-	ImGui::Begin("Lights");	
+	ImGui::Begin("Insepctor");	
+	ImGui::SetWindowPos({ 0,0 });
+	ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight});
 
 	ImGui::InputInt("Set Post Process Val:", &m_postProcess);
 	ImGui::Text("");
+	m_globalLight.ImGUI_Functions("Global Light", false);
 
-	ImGui::Checkbox("Add Light", &m_addLight);
-	
+	ImGui::Text("Objects");
+
+	std::map<std::string, bool>::iterator it = m_objects.begin();
+
+	while (it != m_objects.end())
+	{
+		std::string name = it->first.c_str();
+		ImGui::Checkbox(name.c_str(), &m_objects.at(name));
+		it++;
+	}
+
+
+	ImGui::BeginChild(ImGuiID(1), { 0,0 }, true);
+	ImGui::Text("Lights");
 	ImGui::Text("");
-
-	//m_globalLight.ImGUI_Functions("Global", false);
+	ImGui::Checkbox("Add Light", &m_addLight);
+	ImGui::Text("");
 
 	for (int i = 0; i < m_pointLights.size(); i++)
 	{
@@ -130,37 +136,93 @@ void Scene::ImGUI_Functions()
 		m_pointLights[i].ImGUI_Functions(name);
 	}
 
-	ImGui::End();
-	
-	ImGui::Begin("Objects");
+	ImGui::EndChild();
 
-	/*for (int i = 0; i < m_currentMesh.size(); i++)
+	ImGui::End();	
+
+	if (m_instances.size() > 0)
 	{
-		ImGui::Checkbox(m_currentMesh[i]->getFilename().c_str(), &m_addObjects1);		
-	}*/	
-	
-	ImGui::Checkbox(m_shaderNames[0].c_str(), &m_addObjects1);
-	ImGui::Checkbox(m_shaderNames[1].c_str(), &m_addObjects2);
-	ImGui::Checkbox(m_shaderNames[2].c_str(), &m_addObjects3);
+		ImGui::Begin("Objects");
+		ImGui::SetWindowPos({ _windowWidth - _windowWidth / 4,0 });
+		ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight });
+		int i = 0;
+		for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+		{
+			Instance* instance = *it;
 
+			std::string name = " ";
+			name += i + 1 + 48;
+
+			instance->ImGUI_Functions(name);
+			i++;
+		}
+
+		ImGui::End();
+	}
+	
+
+
+
+	/*ImGui::BeginChild(ImGuiID(1), { 0,250 }, true);
+	ImGui::Text("Lights");
+
+
+	ImGui::Text("");
+
+	ImGui::Checkbox("Add Light", &m_addLight);
+
+	for (int i = 0; i < m_pointLights.size(); i++)
+	{
+		std::string name = "Light ";
+		name += i + 1 + 48;
+
+		m_pointLights[i].ImGUI_Functions(name);
+	}
+
+	ImGui::EndChild();	
+
+
+
+	ImGui::BeginChild(ImGuiID(2), {0,250}, true);
+
+	ImGui::Text("Objects");
+
+	std::map<std::string, bool>::iterator it = m_objects.begin();
+
+	while (it != m_objects.end())
+	{
+		std::string name = it->first.c_str();
+		ImGui::Checkbox(name.c_str(), &m_objects.at(name));
+		it++;
+	}
+
+	ImGui::Text(" ");
 
 	int i = 0;
 	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
 	{
 		Instance* instance = *it;
 		
-		std::string name = "Object ";
+		std::string name = " ";
 		name += i + 1 + 48;
 
 		instance->ImGUI_Functions(name); 
 		i++;
 	}
 
-	ImGui::End();
+	ImGui::EndChild();
+	ImGui::End();*/
+
 }
 
 void Scene::AddShader(aie::ShaderProgram* _newShader, std::string _name)
 {
 	m_currentShader.push_back(_newShader);
 	m_shaderNames.push_back(_name);
+}
+
+void Scene::AddMesh(aie::OBJMesh* _newMesh, std::string _name)
+{
+	m_currentMesh.push_back(_newMesh); 
+	m_objects.insert({_name, false});
 }

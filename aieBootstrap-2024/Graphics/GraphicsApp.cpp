@@ -41,10 +41,12 @@ bool GraphicsApp::startup() {
 	// create simple camera transforms
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 
-	float aspecitRatio = getWindowWidth() / getWindowHeight();
+	float aspecitRatio = getWindowWidth() / (float)getWindowHeight();
 
 	m_flyCamera.SetAspectRatio(getWindowWidth(), getWindowHeight());
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, aspecitRatio, 0.1f, 1000.0f);
+
+	m_flyCamera.SetProjectionMatrix(0.25f, aspecitRatio, 0.1f, 1000.0f);
 
 	SolarSystem(1);
 
@@ -55,12 +57,10 @@ bool GraphicsApp::startup() {
 	Lights globalLight;
 
 	globalLight.color = { 1,1,1 };
-	globalLight.direction = { 1, -1, 1 };
+	globalLight.direction = { 1, 1, 1 };
+	globalLight.intensity = 10;
 
-	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), globalLight);
-	m_scene->GetPointLights().push_back(Lights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50.f));
-	m_scene->GetPointLights().push_back(Lights(glm::vec3(-5, 3, 0), glm::vec3(0, 1, 0), 50.f));
-	
+	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), globalLight);	
 	return LaunchShaders();
 }
 
@@ -73,11 +73,7 @@ void GraphicsApp::shutdown() {
 void GraphicsApp::update(float deltaTime) {
 
 	// wipe the gizmos clean for this frame
-	Gizmos::clear();
-
-	float aspecitRatio = getWindowWidth() / getWindowHeight();
-
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, aspecitRatio, 0.1f, 1000.0f);
+	Gizmos::clear();	
 
 	// draw a simple grid with gizmos
 	vec4 white(1);
@@ -96,6 +92,24 @@ void GraphicsApp::update(float deltaTime) {
 
 	m_scene->Update(deltaTime);
 
+	m_scene->ImGUI_Functions((float)getWindowWidth(), (float)getWindowHeight());
+	float aspecitRatio = getWindowWidth() / (float)getWindowHeight();
+	
+	
+	if (windowWidth != getWindowWidth())
+	{
+		m_renderTarget.initialise(1, getWindowWidth(), (float)getWindowHeight());		
+	}
+
+	windowWidth = getWindowWidth();	
+	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
+
+	m_flyCamera.SetAspectRatio(getWindowWidth(), (float)getWindowHeight());
+	m_flyCamera.SetProjectionMatrix(0.25f, aspecitRatio, 0.1f, 1000.0f);
+
+	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, aspecitRatio, 0.1f, 1000.0f);
+
+
 	// custom function
 	if (showPlanets)
 	{
@@ -108,13 +122,13 @@ void GraphicsApp::update(float deltaTime) {
 
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
+
 }
 
 void GraphicsApp::draw() {
 
 	// Bind to the render target
 	m_renderTarget.bind();
-
 
 	// wipe the screen to the background colour
 	clearScreen();
@@ -128,29 +142,29 @@ void GraphicsApp::draw() {
 	}
 
 	// update perspective based on screen size
-
-	m_viewMatrix = bc->GetViewMatrix();
+	m_viewMatrix = bc->GetViewMatrix(); 
 	m_projectionMatrix = bc->GetProjectionMatrix();
-
 	m_scene->Draw();
 
-	auto pv = m_projectionMatrix * m_viewMatrix;	
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, float(getWindowWidth() / getWindowHeight()), 0.1f, 1000.0f);
-
+	auto pv = m_projectionMatrix * m_viewMatrix;	 
 
 	Gizmos::draw(pv);
 
-
 	// Unbind the target from the backbuffer
-
 	m_renderTarget.unbind();
 
 	// Clear the back buffer
 	clearScreen();
 
+
+	
+
 	m_postProcess.bind();
 	m_postProcess.bindUniform("colorTarget", 0);
 	m_postProcess.bindUniform("postProcessTarget", m_scene->GetPostProcess());
+	m_postProcess.bindUniform("screenWidth", (float)getWindowWidth());
+	m_postProcess.bindUniform("screenHeight", (float)getWindowHeight());
+
 	m_renderTarget.getTarget(0).bind(0);
 
 	m_screenQuad.Draw();
@@ -169,21 +183,20 @@ void GraphicsApp::ImGUI_Helper()
 bool GraphicsApp::LaunchShaders()
 {
 	// Loading Shaders
-	if (!LoadShaders(m_boundTexture, "./shaders/textured.", "Textured"))
+	if (!LoadShaders(m_boundTexture, "./shaders/textured.", "Textured", false))
 		return false;
 
 	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader"))
 		return false;
 
-	if (!LoadShaders(m_normalMap, "./shaders/normalMap.", "Normal Map"))
+	if (!LoadShaders(m_color, "./shaders/color.", "Color", false))
 		return false;
 
 	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing", false))
 		return false;
 
 
-
-	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
+	if (m_renderTarget.initialise(1, getWindowWidth(), (float)getWindowHeight()) == false)
 	{
 		printf("Render Target has an error!!\n");
 		return false;
@@ -199,18 +212,9 @@ bool GraphicsApp::LaunchShaders()
 		0,0,0,1
 	};
 
-
 	// Load Mesh using Transform
 	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
-
-	
-
-	// Creating Instances
-	/*for (int i = 0; i < 0; i++)
-	{
-		m_scene->AddInstance(new Instance(glm::vec3(i * 2,0,0), glm::vec3(0, 0, 0), glm::vec3(1), &m_spearMesh, &m_normalMapPhong));
-	}*/
-	
+	//ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
 
 	return true;
 }
@@ -289,7 +293,6 @@ void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
 	//m_boxMesh.Initialise(8, vertices, 38, indices);
 }
 
-
 bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, bool _addToScene)
 {
 	std::string vert = _filePath;
@@ -325,7 +328,7 @@ bool GraphicsApp::ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, cons
 		_position.x, _position.y, _position.z, 1
 	};
 
-	m_scene->AddMesh(&__objMesh);
+	m_scene->AddMesh(&__objMesh, _filename);
 
 	return false;
 }

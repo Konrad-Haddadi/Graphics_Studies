@@ -9,6 +9,8 @@ in vec2 vTexCoord;
 in vec3 vTangent;
 in vec3 vBiTangent;
 
+uniform int layerSample;
+
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D normalTexture;
@@ -51,7 +53,7 @@ void main()
     vec3 N = normalize(vNormal);
     vec3 T = normalize(vTangent);
     vec3 B = normalize(vBiTangent);
-    vec3 L = normalize(LightDirection);
+    vec3 L = normalize(-LightDirection);
 
     mat3 TBN = mat3(T,B,N);
 
@@ -84,11 +86,33 @@ void main()
 
         diffuseTotal += Diffuse(direction, color, N);
         specularTotal += Specular(direction, color, N, V);
-    }
-
+    }    
+    
     vec3 ambient = ambientLight * Ka * texDiffuse;
     vec3 diffuse = Kd * texDiffuse * diffuseTotal;
     vec3 specular = Ks * texSpecular * specularTotal;
 
-    FragColor = vec4(ambient + diffuse + specular, 1);
+
+    switch(layerSample)
+    {
+        case 0:
+        FragColor = vec4(ambient + diffuse + specular, 1);
+        break;
+
+        case 1:
+        FragColor = texture(diffuseTexture, vTexCoord);
+        break;    
+
+        case 2:
+        FragColor = vec4(N, 1);
+        break;
+
+        case 3:
+        FragColor = vec4(V, 1);
+        break;
+
+        case 4:
+        FragColor = vec4(R, 1);
+        break;
+    }
 }

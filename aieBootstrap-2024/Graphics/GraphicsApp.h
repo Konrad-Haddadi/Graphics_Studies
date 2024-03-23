@@ -45,13 +45,16 @@ protected:
 	Scene* m_scene;
 
 
+	float windowWidth;
+
 	aie::RenderTarget m_renderTarget;
+
 	// camera transforms
 	glm::mat4	m_viewMatrix;
 	glm::mat4	m_projectionMatrix;
 
 	aie::ShaderProgram m_simpleShader;
-	aie::ShaderProgram m_normalMap;
+	aie::ShaderProgram m_color;
 	aie::ShaderProgram m_simplePhong;
 	aie::ShaderProgram m_classicPhong;
 	aie::ShaderProgram m_texturedPhong;

@@ -1,0 +1,19 @@
+# Blender MTL File: 'Super_meatboy.blend'
+# Material Count: 2
+
+newmtl Super_meat
+Ka 0.200000 0.200000 0.200000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ns 20.000000
+illum 2
+
+
+newmtl Super_meat.001
+Ka 0.200000 0.200000 0.200000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ns 20.000000
+illum 2
+map_Bump meatboy_texture_NORM.png
+map_Kd meatboy_texture.png

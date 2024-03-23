@@ -23,15 +23,18 @@ void Lights::ImGUI_Functions(std::string _name, bool _canRemove)
 
 	ImGui::ColorButton(ImVec4(color.x, color.y, color.z, 1));
 
+	glm::vec3 movePos = glm::vec3(0);
+
+
 	ImGui::SliderFloat3(nameColor.c_str(), &color.x, 0, 1);
-	ImGui::SliderFloat3(namePos.c_str(), &direction.x, -50, 50);
+	ImGui::SliderFloat3(namePos.c_str(), &movePos.x, -1, 1);
 	ImGui::SliderFloat(nameIntensity.c_str(), &intensity, 0, 100);
 	
 	ImGui::Text(" ");
 
-	glm::vec3 dist = { direction.x, direction.y, direction.z };
-	
+	direction += movePos *0.25f;
 
+	glm::vec3 dist = { direction.x, direction.y, direction.z };
 	aie::Gizmos::addSphere(dist, intensity / 50, 10, 10, glm::vec4(color.x, color.y, color.z, 0.75f));
 
 }

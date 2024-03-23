@@ -6,6 +6,7 @@
 #include "Lights.h"
 #include "OBJMesh.h"
 #include "Shader.h"
+#include <map>
 
 class BaseCamera;
 class Instance;
@@ -21,15 +22,15 @@ public:
 	void AddInstance(Instance* _instance);
 	void Update(float _dt);
 	void Draw();
-	void ImGUI_Functions();
+	void ImGUI_Functions(float _windowWidth, float _windowHeight);
 
 	void AddPointLights(Lights _light) { m_pointLights.push_back(_light); };
 	void AddShader(aie::ShaderProgram* _newShader, std::string _name);
-	void AddMesh(aie::OBJMesh* _newMesh) { m_currentMesh.push_back(_newMesh); }
+	void AddMesh(aie::OBJMesh* _newMesh, std::string _name);
 
 	BaseCamera* GetCamera() { return m_camera; }
 	glm::vec2 GetWindowSize() { return m_windowSize; }
-	glm::vec3 GetAmbeintLightColor() { return m_globalLight.color; }
+	glm::vec3 GetAmbeintLightColor() { return m_globalLight.color * m_globalLight.intensity * 0.25f; }
 	void SetAmbientLightColor(glm::vec3 _color) { m_globalLight.color = _color; }
 
 	Lights& GetGlobalLight() { return m_globalLight; }
@@ -44,11 +45,12 @@ public:
 
 
 protected:
+	bool openMenu;
 
 	bool m_addLight;
 	bool m_addObjects1;
-	bool m_addObjects2;
-	bool m_addObjects3;
+
+	std::map<std::string, bool> m_objects;
 
 	int m_postProcess;
 	
