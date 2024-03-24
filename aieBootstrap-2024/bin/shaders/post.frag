@@ -5,7 +5,8 @@ in vec2 vTexCoord;
 
 uniform sampler2D colorTarget;
 uniform int postProcessTarget;
-uniform vec2 screenSize;
+uniform float screenHeight;
+uniform float edgeDif;
 
 out vec4 FragColour;
 
@@ -48,10 +49,30 @@ vec4 EdgeDetection(vec2 texCoord)
 {
     vec2 texel = 1 / textureSize(colorTarget, 0); 
     vec4 compared = texture(colorTarget, texCoord);
-    vec4 color = texture(colorTarget, texCoord + texel * vec2(1,1));
 
-    if(distance(color.xyz, compared.xyz) > 1)
-        return vec4(0,0,0,1);    
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(-1,1)).xyz) > edgeDif);
+       return vec4(0,0,0,1);  
+
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(-1,0)).xyz) > edgeDif);
+       return vec4(0,0,0,1);
+
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(-1,-1)).xyz) > edgeDif);
+       return vec4(0,0,0,1);
+
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(0,0)).xyz) > edgeDif);
+       return vec4(0,0,0,1);
+
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(0,-1)).xyz) > edgeDif);
+       return vec4(0,0,0,1);
+
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(1,1)).xyz) > edgeDif);
+       return vec4(0,0,0,1);
+
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(1,0)).xyz) > edgeDif);
+       return vec4(0,0,0,1);
+
+    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(1, -1)).xyz) > edgeDif);
+       return vec4(0,0,0,1);   
 
     return compared;
 }
@@ -75,7 +96,7 @@ vec4 Scanlines(vec2 texCoord)
     vec2 texel = textureSize(colorTarget, 0) * 50;
     vec4 color = texture(colorTarget, texCoord);
     
-    if(texCoord.y > screenSize.y / 2)
+    if(texCoord.y > screenHeight / 2)
         color *= 0.5f;
 
     return texture(colorTarget, texCoord);
@@ -134,8 +155,6 @@ void main()
     vec2 scale = (texSize - texelSize) / texSize;
     vec2 texCoord = vTexCoord / scale + texelSize * 0.5f; 
     
-    vec2 screenSizeCopy = screenSize;
-
     switch(postProcessTarget)
     {
         case 0: //Default

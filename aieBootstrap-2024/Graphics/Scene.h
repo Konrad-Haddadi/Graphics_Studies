@@ -44,6 +44,9 @@ public:
 
 
 
+public:
+	float edgeDetection;
+
 protected:
 	bool openMenu;
 

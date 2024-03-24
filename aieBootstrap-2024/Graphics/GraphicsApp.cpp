@@ -158,12 +158,13 @@ void GraphicsApp::draw() {
 
 
 	
+	float screenHeight = (float)getWindowHeight();
 
 	m_postProcess.bind();
 	m_postProcess.bindUniform("colorTarget", 0);
+	m_postProcess.bindUniform("screenHeight", screenHeight);
+	m_postProcess.bindUniform("edgeDif", m_scene->edgeDetection);
 	m_postProcess.bindUniform("postProcessTarget", m_scene->GetPostProcess());
-	m_postProcess.bindUniform("screenWidth", (float)getWindowWidth());
-	m_postProcess.bindUniform("screenHeight", (float)getWindowHeight());
 
 	m_renderTarget.getTarget(0).bind(0);
 

@@ -17,6 +17,7 @@ Scene::Scene(BaseCamera* _camera, glm::vec2 _windowSize, Lights& _globalLight)
 	m_addObjects1 = false;
 	
 	openMenu = false;
+	edgeDetection = 10;
 }
 
 Scene::~Scene()
@@ -107,6 +108,14 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 	ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight});
 
 	ImGui::InputInt("Set Post Process Val:", &m_postProcess);
+
+	switch (m_postProcess)
+	{
+	case 3:
+		ImGui::InputFloat("Set Edge Detection:", &edgeDetection);
+		break;
+	}
+
 	ImGui::Text("");
 	m_globalLight.ImGUI_Functions("Global Light", false);
 
@@ -159,60 +168,6 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 
 		ImGui::End();
 	}
-	
-
-
-
-	/*ImGui::BeginChild(ImGuiID(1), { 0,250 }, true);
-	ImGui::Text("Lights");
-
-
-	ImGui::Text("");
-
-	ImGui::Checkbox("Add Light", &m_addLight);
-
-	for (int i = 0; i < m_pointLights.size(); i++)
-	{
-		std::string name = "Light ";
-		name += i + 1 + 48;
-
-		m_pointLights[i].ImGUI_Functions(name);
-	}
-
-	ImGui::EndChild();	
-
-
-
-	ImGui::BeginChild(ImGuiID(2), {0,250}, true);
-
-	ImGui::Text("Objects");
-
-	std::map<std::string, bool>::iterator it = m_objects.begin();
-
-	while (it != m_objects.end())
-	{
-		std::string name = it->first.c_str();
-		ImGui::Checkbox(name.c_str(), &m_objects.at(name));
-		it++;
-	}
-
-	ImGui::Text(" ");
-
-	int i = 0;
-	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
-	{
-		Instance* instance = *it;
-		
-		std::string name = " ";
-		name += i + 1 + 48;
-
-		instance->ImGUI_Functions(name); 
-		i++;
-	}
-
-	ImGui::EndChild();
-	ImGui::End();*/
-
 }
 
 void Scene::AddShader(aie::ShaderProgram* _newShader, std::string _name)
