@@ -1,0 +1,14 @@
+﻿  GraphicsApp.cpp
+C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\Scene.h(39,53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'GraphicsApp.cpp')
+  
+C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(46,62): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(46,43): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(101,72): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(104,30): warning C4244: '=': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(107,43): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(199,75): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+bootstrap.lib(imgui_glfw3.obj) : warning LNK4099: PDB '' was not found with 'bootstrap.lib(imgui_glfw3.obj)' or at ''; linking object as if no debug info
+bootstrap.lib(Input.obj) : warning LNK4099: PDB '' was not found with 'bootstrap.lib(Input.obj)' or at ''; linking object as if no debug info
+bootstrap.lib(Texture.obj) : warning LNK4099: PDB '' was not found with 'bootstrap.lib(Texture.obj)' or at ''; linking object as if no debug info
+  Graphics.vcxproj -> C:\Users\User\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\temp\Graphics\x64\Debug\Graphics.exe
