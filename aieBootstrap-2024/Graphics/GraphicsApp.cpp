@@ -12,7 +12,8 @@
 #include <list>
 #include "Scene.h"
 #include "Instance.h"
-
+#include <gl_core_4_4.h>
+#include <iostream>
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
@@ -91,8 +92,11 @@ void GraphicsApp::update(float deltaTime) {
 	Gizmos::addTransform(mat4(1));
 
 	m_scene->Update(deltaTime);
-
 	m_scene->ImGUI_Functions((float)getWindowWidth(), (float)getWindowHeight());
+	
+	m_scanlineTimer += deltaTime * deltaTime;
+	ImGUI_Helper();
+
 	float aspecitRatio = getWindowWidth() / (float)getWindowHeight();
 	
 	
@@ -155,30 +159,28 @@ void GraphicsApp::draw() {
 
 	// Clear the back buffer
 	clearScreen();
-
-
 	
 	float screenHeight = (float)getWindowHeight();
 
 	m_postProcess.bind();
 	m_postProcess.bindUniform("colorTarget", 0);
-	m_postProcess.bindUniform("screenHeight", screenHeight);
-	m_postProcess.bindUniform("edgeDif", m_scene->edgeDetection);
 	m_postProcess.bindUniform("postProcessTarget", m_scene->GetPostProcess());
+	m_postProcess.bindUniform("screenPos", m_scanlineTimer);
+	m_postProcess.bindUniform("difference", m_scene->GetEdgeDetection());
+	m_postProcess.bindUniform("pixels", m_scene->GetPixelAmount());
+	m_postProcess.bindUniform("colorDifference", m_scene->GetColorDif());
+	m_postProcess.bindUniform("whiteColor", m_scene->GetWhiteColorDif());
+		
 
 	m_renderTarget.getTarget(0).bind(0);
 
-	m_screenQuad.Draw();
+	m_screenQuad.Draw();	
+
 }
 
 void GraphicsApp::ImGUI_Helper()
 {
-	ImGui::Begin("Planet Loader");
-
-	ImGui::Text("Planet Display");
-	ImGui::Checkbox("Show Planets", &showPlanets);
-
-	ImGui::End();
+		
 }
 
 bool GraphicsApp::LaunchShaders()

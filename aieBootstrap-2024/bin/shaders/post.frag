@@ -2,13 +2,23 @@
 #version 410
 
 in vec2 vTexCoord;
+in vec4 gl_FragCoord;
+
+out vec4 FragColour;
 
 uniform sampler2D colorTarget;
 uniform int postProcessTarget;
-uniform float screenHeight;
-uniform float edgeDif;
+uniform float screenPos;
+uniform float difference;
+uniform float colorDifference;
+uniform float whiteColor;
+uniform int pixels;
 
-out vec4 FragColour;
+float colorDif;
+float scanlineTimer;
+float edgeDif;
+float whiteColorDif;
+int pixelAmount;
 
 vec4 Default(vec2 texCoord)
 {
@@ -47,34 +57,58 @@ vec4 BoxBlur(vec2 texCoord)
 
 vec4 EdgeDetection(vec2 texCoord)
 {
-    vec2 texel = 1 / textureSize(colorTarget, 0); 
-    vec4 compared = texture(colorTarget, texCoord);
+    vec2 texel = 1.0f / textureSize(colorTarget, 0); 
+    vec4 color = texture(colorTarget, texCoord);
+    int count = 0;
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(-1,1)).xyz) > edgeDif);
-       return vec4(0,0,0,1);  
+    float dif = edgeDif;
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(-1,0)).xyz) > edgeDif);
-       return vec4(0,0,0,1);
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(-1,1)).xyz)) > dif)
+    {
+        count++;
+    }
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(-1,-1)).xyz) > edgeDif);
-       return vec4(0,0,0,1);
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(-1,0)).xyz)) > dif)
+    {
+        count++;
+    }
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(0,0)).xyz) > edgeDif);
-       return vec4(0,0,0,1);
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(-1,-1)).xyz)) > dif)
+    {
+        count++;
+    }
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(0,-1)).xyz) > edgeDif);
-       return vec4(0,0,0,1);
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(0,0)).xyz)) > dif)
+    {
+        count++;
+    }
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(0,-1)).xyz)) > dif)
+    {
+        count++;
+    }
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(1,1)).xyz)) > dif)
+    {
+        count++;
+    }
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(1,0)).xyz)) > dif)
+    {
+        count++;
+    }
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(1,1)).xyz) > edgeDif);
-       return vec4(0,0,0,1);
+    if(distance(normalize(color.xyz), normalize(texture(colorTarget, texCoord + texel * vec2(1,-1)).xyz)) > dif)
+    {
+        count++;
+    } 
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(1,0)).xyz) > edgeDif);
-       return vec4(0,0,0,1);
 
-    if(distance(compared.xyz, texture(colorTarget, texCoord + texel * vec2(1, -1)).xyz) > edgeDif);
-       return vec4(0,0,0,1);   
-
-    return compared;
+    if(count > 0)
+    {
+        return vec4(0,0,0,1);
+    }
+    else
+    {
+        return color;
+    }
 }
 
 vec4 Sepia(vec2 texCoord)
@@ -95,11 +129,11 @@ vec4 Scanlines(vec2 texCoord)
 {
     vec2 texel = textureSize(colorTarget, 0) * 50;
     vec4 color = texture(colorTarget, texCoord);
-    
-    if(texCoord.y > screenHeight / 2)
-        color *= 0.5f;
 
-    return texture(colorTarget, texCoord);
+    if(sin((texCoord.y + scanlineTimer) * 1000) > 0)
+        color = vec4(color.x * 0.75f, color.y * 0.75f, color.z * 0.75f, 1);
+
+    return color;
 }
 
 vec4 Greyscale(vec2 texCoord)
@@ -126,24 +160,50 @@ vec4 Inverse(vec2 texCoord)
 
 vec4 Pixilizer(vec2 texCoord)
 {
-    vec2 texel = textureSize(colorTarget, 0) * 50;
-    vec4 color = texture(colorTarget, texCoord);
+    vec2 texel = textureSize(colorTarget, 0) * pixelAmount;
+    vec4 color = texture(colorTarget, texCoord + texel);
 
-    color += texture(colorTarget, texCoord + texel * vec2(-1,1));
-    color += texture(colorTarget, texCoord + texel * vec2(-1,0));
-    color += texture(colorTarget, texCoord + texel * vec2(-1,-1));
-
-    color += texture(colorTarget, texCoord + texel * vec2(0,0));
-    color += texture(colorTarget, texCoord + texel * vec2(0,-1));
-
-    color += texture(colorTarget, texCoord + texel * vec2(1,1));
-    color += texture(colorTarget, texCoord + texel * vec2(1,0));
-    color += texture(colorTarget, texCoord + texel * vec2(1,-1));
-
-    return color / 9;
+    return color;
 }
 
 
+vec4 Posterization(vec2 texCoord)
+{
+    vec2 texel = 1.0f / textureSize(colorTarget, 0); 
+    vec4 color = texture(colorTarget, texCoord);
+
+    float dif = colorDif;
+
+    color = vec4(round(color.xyz * dif) / dif, 1);
+
+    return color;
+}
+
+vec4 Distance(vec2 texCoord)
+{
+    vec2 texel = 1.0f / textureSize(colorTarget, 0); 
+    vec4 color = texture(colorTarget, texCoord);
+
+    vec3 result = vec3(color.xyz);
+
+    return vec4(result, 1);
+}
+
+vec4 WhiteDetection(vec2 texCoord)
+{
+    vec2 texel = 1.0f / textureSize(colorTarget, 0); 
+    vec4 color = texture(colorTarget, texCoord);
+
+    vec4 edgeColor =  EdgeDetection(texCoord);
+
+    if(edgeColor.x == 0 && edgeColor.y == 0 && edgeColor.y == 0)
+        return edgeColor;
+
+    if(abs(color.x - color.y - color.z) > whiteColorDif)
+        return vec4(1,1,1,1);
+
+    return color;
+}
 
 void main()
 {
@@ -155,43 +215,64 @@ void main()
     vec2 scale = (texSize - texelSize) / texSize;
     vec2 texCoord = vTexCoord / scale + texelSize * 0.5f; 
     
+    scanlineTimer = screenPos;
+    edgeDif = difference / 10;
+    pixelAmount = pixels * 10;
+    colorDif = colorDifference;
+    whiteColorDif = whiteColor;
+
     switch(postProcessTarget)
     {
         case 0: //Default
         FragColour = Default(texCoord); // Done
         break;
+
         case 1: //Distort
         FragColour = Distort(texCoord); // Done
         break;
+
         case 2: //Box Blur
         FragColour = BoxBlur(texCoord); // Done
         break;
+
         case 3: //Edge Detection
-        FragColour = EdgeDetection(texCoord); // Not Done - Meh
+        FragColour = EdgeDetection(texCoord); // Done
         break;
+
         case 4: //Sepia
-        FragColour = Sepia(texCoord); // No Idea still
+        FragColour = Sepia(texCoord); // Done
         break;
+
         case 5: //Scanlines
-        FragColour = Scanlines(texCoord); // Not Done
+        FragColour = Scanlines(texCoord); // Done
         break;
+
         case 6: //Grey scale
         FragColour = Greyscale(texCoord); // Done
         break;
+
         case 7: //Invert
         FragColour = Inverse(texCoord); // Done
         break;
+
         case 8: //Pixilizer
         FragColour = Pixilizer(texCoord); // Kinda Done
         break;
+
         case 9: //Posterization
-        FragColour = Default(texCoord); // No Idea
+        FragColour = Posterization(texCoord); // No Idea
         break;
+
         case 10: //Distance Fog
-        FragColour = Default(texCoord); // Havent looked into
+        FragColour = Distance(texCoord); // Havent looked into
         break;
+
         case 11: //Depth of Field
         FragColour = Default(texCoord); // Havent looked into
+        break;
+
+        case 12: //White EdgeDetection
+        FragColour = WhiteDetection(texCoord); // Havent looked into
         break;
     }
 

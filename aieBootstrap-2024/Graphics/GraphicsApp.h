@@ -41,10 +41,9 @@ protected:
 	void SolarSystem(float _speed);
 
 	bool showPlanets;
-
 	Scene* m_scene;
-
-
+	float m_scanlineTimer = 100;
+	
 	float windowWidth;
 
 	aie::RenderTarget m_renderTarget;

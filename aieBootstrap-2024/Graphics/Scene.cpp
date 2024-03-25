@@ -12,12 +12,10 @@ Scene::Scene(BaseCamera* _camera, glm::vec2 _windowSize, Lights& _globalLight)
 	: m_camera(_camera), m_windowSize(_windowSize), m_globalLight(_globalLight)
 {
 	m_addLight = false;
-	m_postProcess = 0;
 
 	m_addObjects1 = false;
 	
 	openMenu = false;
-	edgeDetection = 10;
 }
 
 Scene::~Scene()
@@ -112,10 +110,24 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 	switch (m_postProcess)
 	{
 	case 3:
-		ImGui::InputFloat("Set Edge Detection:", &edgeDetection);
+		ImGui::DragFloat("Set Edge Detection:", &m_edgeDetection, .01f, 0, 3);
+		break;
+
+	case 8:
+		ImGui::InputInt("Set Pixel Amount:", &m_pixel, 1);
+		break;
+
+	case 9:
+		ImGui::DragFloat("Set Color Dif:", &m_colorDifference, 0.01f, 1, 5);
+		break;
+
+	case 12:
+		ImGui::DragFloat("Set White Color Dif:", &m_whiteColor, 0.01f, 0, 1);
+		ImGui::DragFloat("Set Edge Detection:", &m_edgeDetection, .01f, 0, 3);
+
 		break;
 	}
-
+	
 	ImGui::Text("");
 	m_globalLight.ImGUI_Functions("Global Light", false);
 
