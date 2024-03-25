@@ -103,7 +103,7 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 {
 	ImGui::Begin("Insepctor");	
 	ImGui::SetWindowPos({ 0,0 });
-	ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight});
+	ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight - _windowHeight / 4});
 
 	ImGui::InputInt("Set Post Process Val:", &m_postProcess);
 
@@ -142,7 +142,9 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 		it++;
 	}
 
-
+	//ImGui::Begin("Insepctor");
+	/*ImGui::SetWindowPos({ 0,_windowHeight - _windowHeight / 4 });
+	ImGui::SetWindowSize({ _windowWidth / 4,_windowHeight - _windowHeight / 4 });*/
 	ImGui::BeginChild(ImGuiID(1), { 0,0 }, true);
 	ImGui::Text("Lights");
 	ImGui::Text("");
@@ -159,27 +161,26 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 
 	ImGui::EndChild();
 
-	ImGui::End();	
+	ImGui::End();
 
-	if (m_instances.size() > 0)
+	
+	ImGui::Begin("Objects");
+	ImGui::SetWindowPos({ _windowWidth - _windowWidth / 4,0 });
+	ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight });
+	int i = 0;
+	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
 	{
-		ImGui::Begin("Objects");
-		ImGui::SetWindowPos({ _windowWidth - _windowWidth / 4,0 });
-		ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight });
-		int i = 0;
-		for (auto it = m_instances.begin(); it != m_instances.end(); it++)
-		{
-			Instance* instance = *it;
+		Instance* instance = *it;
 
-			std::string name = " ";
-			name += i + 1 + 48;
+		std::string name = " ";
+		name += i + 1 + 48;
 
-			instance->ImGUI_Functions(name);
-			i++;
-		}
-
-		ImGui::End();
+		instance->ImGUI_Functions(name);
+		i++;
 	}
+
+	ImGui::End();
+	
 }
 
 void Scene::AddShader(aie::ShaderProgram* _newShader, std::string _name)

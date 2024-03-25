@@ -206,6 +206,18 @@ vec4 WhiteDetection(vec2 texCoord)
     return color;
 }
 
+vec4 Combine(vec2 texCoord)
+{
+    vec2 texel = 1.0f / textureSize(colorTarget, 0); 
+    vec4 color = texture(colorTarget, texCoord);
+
+    vec4 scanlineTest = Scanlines(texCoord);
+    vec4 invert = Inverse(texCoord);
+    vec4 pixelator = Pixilizer(texCoord);
+
+    return (pixelator * (scanlineTest + invert) );
+}
+
 void main()
 {
     // First we want to calculate the texel's size
@@ -274,6 +286,10 @@ void main()
 
         case 12: //White EdgeDetection
         FragColour = WhiteDetection(texCoord); // Havent looked into
+        break;
+
+        case 13: //Combine
+        FragColour = Combine(texCoord); // Havent looked into
         break;
     }
 
