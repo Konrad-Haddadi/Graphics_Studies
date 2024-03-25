@@ -41,7 +41,8 @@ void Instance::Draw(Scene* _scene)
 	m_shader->bindUniform("normalTexture", 0);
 			
 	m_shader->bindUniform("CameraPosition", bc->GetPosition());
-			
+
+		
 	m_shader->bindUniform("LightDirection", _scene->GetGlobalLight().direction);
 	m_shader->bindUniform("ambientLight", _scene->GetAmbeintLightColor());
 	m_shader->bindUniform("diffuseLight", _scene->GetAmbeintLightColor());
@@ -78,11 +79,11 @@ void Instance::ImGUI_Functions(std::string _addToName, bool _canRemove)
 
 	ImGui::InputInt(nameLayer.c_str(), &layerSample);
 
-	if (layerSample > 4)
+	if (layerSample > 5)
 		layerSample = 0;
 
 	if (layerSample < 0)
-		layerSample = 4;
+		layerSample = 5;
 
 
 	ImGui::Text("");

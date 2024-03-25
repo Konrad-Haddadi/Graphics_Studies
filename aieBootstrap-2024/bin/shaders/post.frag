@@ -7,6 +7,8 @@ in vec4 gl_FragCoord;
 out vec4 FragColour;
 
 uniform sampler2D colorTarget;
+uniform sampler2D depthTarget;
+
 uniform int postProcessTarget;
 uniform float screenPos;
 uniform float difference;
@@ -183,10 +185,9 @@ vec4 Distance(vec2 texCoord)
 {
     vec2 texel = 1.0f / textureSize(colorTarget, 0); 
     vec4 color = texture(colorTarget, texCoord);
+    vec4 colorDepth = texture(depthTarget, texCoord);
 
-    vec3 result = vec3(color.xyz);
-
-    return vec4(result, 1);
+    return vec4(color.xyz, colorDepth.r);
 }
 
 vec4 WhiteDetection(vec2 texCoord)

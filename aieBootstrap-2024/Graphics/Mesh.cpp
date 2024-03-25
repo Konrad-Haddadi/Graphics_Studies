@@ -139,13 +139,13 @@ void Mesh::InitialiseFullScreenQuad()
 
 	float vertices[] = {
 
-	   -1, 1, // Left Top
-	   -1,-1, // Left Bottom
-		1, 1, // Right Top
+	   -.5, 1, // Left Top
+	   -0.5,-0.5, // Left Bottom
+		0.5, 1, // Right Top
 	   
-		-1,-1, // Left Bottom
-		1,-1, // Right Bottom
-		1, 1  // Right top
+		-0.5,-0.5, // Left Bottom
+		0.5,-0.5, // Right Bottom
+		0.5, 1,  // Right top
 	};
 	
 	// Fill vertex buffer

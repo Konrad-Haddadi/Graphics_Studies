@@ -114,5 +114,10 @@ void main()
         case 4:
         FragColor = vec4(R, 1);
         break;
+
+        case 5:
+        float dist = distance(vPosition.xyz, CameraPosition.xyz)/ 100;
+        FragColor = vec4(texture(diffuseTexture, vTexCoord).xyz * dist, 1);
+        break;
     }
 }

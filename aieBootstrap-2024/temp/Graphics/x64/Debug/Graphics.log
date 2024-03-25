@@ -1,4 +1,2 @@
-﻿  Scene.cpp
-C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\Scene.h(39,26): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\Scene.cpp(48,38): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+﻿  Mesh.cpp
   Graphics.vcxproj -> C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\temp\Graphics\x64\Debug\Graphics.exe

@@ -164,6 +164,7 @@ void GraphicsApp::draw() {
 
 	m_postProcess.bind();
 	m_postProcess.bindUniform("colorTarget", 0);
+	m_postProcess.bindUniform("depthTarget", 1);
 	m_postProcess.bindUniform("postProcessTarget", m_scene->GetPostProcess());
 	m_postProcess.bindUniform("screenPos", m_scanlineTimer);
 	m_postProcess.bindUniform("difference", m_scene->GetEdgeDetection());
@@ -171,8 +172,8 @@ void GraphicsApp::draw() {
 	m_postProcess.bindUniform("colorDifference", m_scene->GetColorDif());
 	m_postProcess.bindUniform("whiteColor", m_scene->GetWhiteColorDif());
 		
-
 	m_renderTarget.getTarget(0).bind(0);
+	//m_renderTarget.bindDepthTarget(0);
 
 	m_screenQuad.Draw();	
 
@@ -199,7 +200,13 @@ bool GraphicsApp::LaunchShaders()
 		return false;
 
 
-	if (m_renderTarget.initialise(1, getWindowWidth(), (float)getWindowHeight()) == false)
+	if (m_renderTarget.initialise(1, getWindowWidth(), (float)getWindowHeight(), true) == false)
+	{
+		printf("Render Target has an error!!\n");
+		return false;
+	}
+
+	if (m_renderTarget.initialise(2, getWindowWidth(), (float)getWindowHeight(), true) == false)
 	{
 		printf("Render Target has an error!!\n");
 		return false;
@@ -218,6 +225,7 @@ bool GraphicsApp::LaunchShaders()
 	// Load Mesh using Transform
 	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
 	//ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
+
 
 	return true;
 }
