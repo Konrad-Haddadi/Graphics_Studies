@@ -61,7 +61,7 @@ protected:
 	int m_pixel = 1;
 	int m_distFog = 1;
 	int m_postProcess = 0;
-	glm::vec2 m_sinVal;
+	glm::vec2 m_sinVal = glm::vec2(0);
 	
 	bool openMenu;
 

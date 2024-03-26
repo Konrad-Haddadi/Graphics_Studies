@@ -1,0 +1,13 @@
+#
+#
+#
+
+newmtl _LP_Mat
+illum 2
+Ka 0.200000 0.200000 0.200000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ns 20.000000
+map_Kd mountain-a_Base_Color.png
+map_Ks mountain-a_Roughness.png
+bump mountain-a_Normal_DirectX.png

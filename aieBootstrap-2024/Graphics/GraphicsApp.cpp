@@ -229,6 +229,7 @@ bool GraphicsApp::LaunchShaders()
 
 	// Load Mesh using Transform
 	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
+	ObjLoader(m_cityMesh, m_cityTransform, "./moutain/LP.obj", "Land", true); 	
 	//ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
 
 

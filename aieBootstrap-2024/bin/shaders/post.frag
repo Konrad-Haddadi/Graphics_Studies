@@ -206,14 +206,16 @@ vec4 Fog(vec2 texCoord)
     vec4 colorDepth = texture(depthTarget, texCoord);
 
     float temp = ((distCheck - colorDepth.r * distCheck) / colorDepth.r);
+    
     //temp *= (((sin(constantTime * 5) + 1) / 2 + (sin(texCoord.x * 2) + 1) / 2  + (sin(texCoord.y * 2) + 1) / 2) / 3);
     //temp += (((sin(constantTime) + 1) / 2) + ((sin(vTexCoord.x * 100) + 1) / 2) + ((sin(vTexCoord.y * 100) + 1) / 2)/3);
     
-    temp += ((abs(sin(vTexCoord.x * sinVal.x))) + (abs(sin(vTexCoord.y * sinVal.y)))/2);
+    //if(temp < (float)distCheck / 100)
+        //temp *= (abs(2 *sin((texCoord.x + constantTime) * sinVal.x))) + (abs(sin(texCoord.y * sinVal.y))) / 2;
 
-    vec4 dist = mix(vec4(vec3(1),1), color, temp);
+    vec3 dist = mix(vec3(1), color.xyz, temp);
 
-    return vec4(color.xyz, abs(temp));
+    return vec4(dist, 1);
 }
 
 vec4 WhiteDetection(vec2 texCoord)

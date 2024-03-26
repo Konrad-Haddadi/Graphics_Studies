@@ -87,6 +87,11 @@ protected:
 	glm::mat4 m_spearTransform;
 	aie::Texture m_spearTexture;
 
+	// City
+	aie::OBJMesh m_cityMesh;
+	glm::mat4 m_cityTransform;
+	aie::Texture m_cityTexture;
+
 	// Bunny Mesh
 	aie::OBJMesh m_bunnyMesh;
 	glm::mat4 m_simpleTransform;
