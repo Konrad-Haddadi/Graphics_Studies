@@ -127,7 +127,6 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 
 	case 10:
 		ImGui::InputInt("Set Distance:", &m_distFog, 1);
-		ImGui::InputFloat2("Sin Val:", &m_sinVal.x, 1);
 
 		break;
 	case 12:
@@ -139,6 +138,11 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 	case 13:
 		ImGui::DragInt("Set Scan Size:", &m_scaneSize, 10, 0, 1000);
 		ImGui::InputInt("Set Pixel Amount:", &m_pixel, 1);
+		break;
+
+	case 14:
+		ImGui::InputInt("Set Distance:", &m_distFog, 1);
+
 		break;
 	}
 	

@@ -5,6 +5,5 @@ C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\Gra
 C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(109,72): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
 C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(112,30): warning C4244: '=': conversion from 'unsigned int' to 'float', possible loss of data
 C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(115,43): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(213,75): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\Graphics\GraphicsApp.cpp(220,75): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
   Graphics.vcxproj -> C:\Users\s220493\Desktop\Github\2024_AIE_Graphics\aieBootstrap-2024\temp\Graphics\x64\Debug\Graphics.exe

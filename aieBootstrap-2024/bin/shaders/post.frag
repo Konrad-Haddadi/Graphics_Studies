@@ -205,13 +205,7 @@ vec4 Fog(vec2 texCoord)
     vec4 color = texture(colorTarget, texCoord);
     vec4 colorDepth = texture(depthTarget, texCoord);
 
-    float temp = ((distCheck - colorDepth.r * distCheck) / colorDepth.r);
-    
-    //temp *= (((sin(constantTime * 5) + 1) / 2 + (sin(texCoord.x * 2) + 1) / 2  + (sin(texCoord.y * 2) + 1) / 2) / 3);
-    //temp += (((sin(constantTime) + 1) / 2) + ((sin(vTexCoord.x * 100) + 1) / 2) + ((sin(vTexCoord.y * 100) + 1) / 2)/3);
-    
-    //if(temp < (float)distCheck / 100)
-        //temp *= (abs(2 *sin((texCoord.x + constantTime) * sinVal.x))) + (abs(sin(texCoord.y * sinVal.y))) / 2;
+    float temp = ((distCheck - colorDepth.r * distCheck) / colorDepth.r);   
 
     vec3 dist = mix(vec3(1), color.xyz, temp);
 
@@ -299,11 +293,11 @@ void main()
         break;
 
         case 8: //Pixilizer
-        FragColour = Pixilizer(texCoord); // Kinda Done
+        FragColour = Pixilizer(texCoord); // Done
         break;
 
         case 9: //Posterization
-        FragColour = Posterization(texCoord); // No Idea
+        FragColour = Posterization(texCoord); // Done
         break;
 
         case 10: //Distance Fog
@@ -320,6 +314,10 @@ void main()
 
         case 13: //Combine
         FragColour = PixilLines(texCoord); // Havent looked into
+        break;
+
+        case 14: //Distance
+        FragColour = Distance(texCoord); // Havent looked into
         break;
     }
 

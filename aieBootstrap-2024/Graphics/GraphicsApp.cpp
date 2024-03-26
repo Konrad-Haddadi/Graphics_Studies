@@ -143,6 +143,8 @@ void GraphicsApp::draw() {
 
 	// custom function
 
+
+
 	if (showPlanets)
 	{
 		for each (Planet * planet in solarSystem)
@@ -152,6 +154,17 @@ void GraphicsApp::draw() {
 	// update perspective based on screen size
 	m_viewMatrix = bc->GetViewMatrix(); 
 	m_projectionMatrix = bc->GetProjectionMatrix();
+
+
+	
+
+	m_color.bind();
+	m_color.bindUniform("ProjectionViewModel", m_boxTransform);
+	m_color.bindUniform("Kd", glm::vec3(1,1,1));
+
+	m_boxMesh.Draw();
+
+
 
 	auto pv = m_projectionMatrix * m_viewMatrix;	 
 	Gizmos::draw(pv);
@@ -178,8 +191,7 @@ void GraphicsApp::draw() {
 	m_postProcess.bindUniform("colorDifference", m_scene->GetColorDif());
 	m_postProcess.bindUniform("whiteColor", m_scene->GetWhiteColorDif());
 	m_postProcess.bindUniform("dist", m_scene->GetFogDist());
-	m_postProcess.bindUniform("constTimer", m_timer);
-	m_postProcess.bindUniform("xAndY", m_scene->GetSinVal());
+	//m_postProcess.bindUniform("constTimer", m_timer);
 		
 	m_renderTarget.getTarget(0).bind(0);
 	m_renderTarget.bindDepthTarget(1);
@@ -218,7 +230,7 @@ bool GraphicsApp::LaunchShaders()
 
 
 	m_quadMesh.InitialiseQuad();
-	SpawnSquare();
+	SpawnCube();
 
 	m_quadTransform = {
 		10,0,0,0,
@@ -229,7 +241,7 @@ bool GraphicsApp::LaunchShaders()
 
 	// Load Mesh using Transform
 	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
-	ObjLoader(m_cityMesh, m_cityTransform, "./moutain/LP.obj", "Land", true); 	
+	//ObjLoader(m_cityMesh, m_cityTransform, "./moutain/LP.obj", "Land", true); 	
 	//ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
 
 
@@ -259,15 +271,16 @@ void GraphicsApp::SpawnCube()
 								  5, 4, 0, 0, 1, 5,
 								  4, 5, 6, 6, 5, 7 };
 
+
+	m_boxTransform = {
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	};
+
 	m_boxMesh.Initialise(8, vertices, 38, indices);
 
-	for (int i = 0; i < 8; i++)
-	{
-		if(i < 7)
-			Gizmos::addLine(vertices[i].position, vertices[i + 1].position, glm::vec4(1, 1, 1, 1));
-		else	
-			Gizmos::addLine(vertices[i].position, vertices[0].position, glm::vec4(1, 1, 1, 1));
-	}
 }
 
 void GraphicsApp::SpawnSquare()
