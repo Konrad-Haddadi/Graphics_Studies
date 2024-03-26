@@ -103,7 +103,7 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 {
 	ImGui::Begin("Insepctor");	
 	ImGui::SetWindowPos({ 0,0 });
-	ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight - _windowHeight / 4});
+	ImGui::SetWindowSize({ _windowWidth / 5,	_windowHeight - _windowHeight / 5});
 
 	ImGui::InputInt("Set Post Process Val:", &m_postProcess);
 
@@ -113,6 +113,10 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 		ImGui::DragFloat("Set Edge Detection:", &m_edgeDetection, .01f, 0, 3);
 		break;
 
+	case 5:
+		ImGui::DragInt("Set Scan Size:", &m_scaneSize, 10, 0, 1000);
+
+		break;
 	case 8:
 		ImGui::InputInt("Set Pixel Amount:", &m_pixel, 1);
 		break;
@@ -121,10 +125,20 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 		ImGui::DragFloat("Set Color Dif:", &m_colorDifference, 0.01f, 1, 5);
 		break;
 
+	case 10:
+		ImGui::InputInt("Set Distance:", &m_distFog, 1);
+		ImGui::InputFloat2("Sin Val:", &m_sinVal.x, 1);
+
+		break;
 	case 12:
 		ImGui::DragFloat("Set White Color Dif:", &m_whiteColor, 0.01f, 0, 1);
 		ImGui::DragFloat("Set Edge Detection:", &m_edgeDetection, .01f, 0, 3);
 
+		break;
+
+	case 13:
+		ImGui::DragInt("Set Scan Size:", &m_scaneSize, 10, 0, 1000);
+		ImGui::InputInt("Set Pixel Amount:", &m_pixel, 1);
 		break;
 	}
 	
@@ -142,11 +156,13 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 		it++;
 	}
 
-	//ImGui::Begin("Insepctor");
-	/*ImGui::SetWindowPos({ 0,_windowHeight - _windowHeight / 4 });
-	ImGui::SetWindowSize({ _windowWidth / 4,_windowHeight - _windowHeight / 4 });*/
-	ImGui::BeginChild(ImGuiID(1), { 0,0 }, true);
-	ImGui::Text("Lights");
+	ImGui::End();
+
+	ImGui::Begin("Lights");
+	ImGui::SetWindowPos({ 0,_windowHeight - _windowHeight / 5 });
+	ImGui::SetWindowSize({ _windowWidth - _windowWidth / 5,	_windowHeight /5});
+
+	
 	ImGui::Text("");
 	ImGui::Checkbox("Add Light", &m_addLight);
 	ImGui::Text("");
@@ -158,15 +174,12 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 
 		m_pointLights[i].ImGUI_Functions(name);
 	}
-
-	ImGui::EndChild();
-
 	ImGui::End();
 
 	
 	ImGui::Begin("Objects");
-	ImGui::SetWindowPos({ _windowWidth - _windowWidth / 4,0 });
-	ImGui::SetWindowSize({ _windowWidth / 4,	_windowHeight });
+	ImGui::SetWindowPos({ _windowWidth - _windowWidth / 5,0 });
+	ImGui::SetWindowSize({ _windowWidth / 5,	_windowHeight });
 	int i = 0;
 	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
 	{

@@ -10,17 +10,26 @@ uniform sampler2D colorTarget;
 uniform sampler2D depthTarget;
 
 uniform int postProcessTarget;
-uniform float screenPos;
+uniform float scanPos;
+uniform int scanSize;
 uniform float difference;
 uniform float colorDifference;
 uniform float whiteColor;
 uniform int pixels;
+uniform int dist;
+uniform float constTimer;
+uniform vec2 xAndY;
+
 
 float colorDif;
 float scanlineTimer;
+int scanlineSize;
 float edgeDif;
 float whiteColorDif;
 int pixelAmount;
+int distCheck;
+float constantTime;
+vec2 sinVal;
 
 vec4 Default(vec2 texCoord)
 {
@@ -132,7 +141,7 @@ vec4 Scanlines(vec2 texCoord)
     vec2 texel = textureSize(colorTarget, 0) * 50;
     vec4 color = texture(colorTarget, texCoord);
 
-    if(sin((texCoord.y + scanlineTimer) * 1000) > 0)
+    if(sin((texCoord.y + scanlineTimer) * scanlineSize) > 0)
         color = vec4(color.x * 0.75f, color.y * 0.75f, color.z * 0.75f, 1);
 
     return color;
@@ -183,11 +192,28 @@ vec4 Posterization(vec2 texCoord)
 
 vec4 Distance(vec2 texCoord)
 {
-    vec2 texel = 1.0f / textureSize(colorTarget, 0); 
     vec4 color = texture(colorTarget, texCoord);
     vec4 colorDepth = texture(depthTarget, texCoord);
 
-    return vec4(color.xyz, colorDepth.r);
+    vec4 dist = mix(color, vec4(vec3(0),1), colorDepth.r);
+
+    return vec4(color.xyz, ((distCheck - colorDepth.r * distCheck) / colorDepth.r));
+}
+
+vec4 Fog(vec2 texCoord)
+{
+    vec4 color = texture(colorTarget, texCoord);
+    vec4 colorDepth = texture(depthTarget, texCoord);
+
+    float temp = ((distCheck - colorDepth.r * distCheck) / colorDepth.r);
+    //temp *= (((sin(constantTime * 5) + 1) / 2 + (sin(texCoord.x * 2) + 1) / 2  + (sin(texCoord.y * 2) + 1) / 2) / 3);
+    //temp += (((sin(constantTime) + 1) / 2) + ((sin(vTexCoord.x * 100) + 1) / 2) + ((sin(vTexCoord.y * 100) + 1) / 2)/3);
+    
+    temp += ((abs(sin(vTexCoord.x * sinVal.x))) + (abs(sin(vTexCoord.y * sinVal.y)))/2);
+
+    vec4 dist = mix(vec4(vec3(1),1), color, temp);
+
+    return vec4(color.xyz, abs(temp));
 }
 
 vec4 WhiteDetection(vec2 texCoord)
@@ -206,16 +232,15 @@ vec4 WhiteDetection(vec2 texCoord)
     return color;
 }
 
-vec4 Combine(vec2 texCoord)
+vec4 PixilLines(vec2 texCoord)
 {
     vec2 texel = 1.0f / textureSize(colorTarget, 0); 
     vec4 color = texture(colorTarget, texCoord);
 
     vec4 scanlineTest = Scanlines(texCoord);
-    vec4 invert = Inverse(texCoord);
     vec4 pixelator = Pixilizer(texCoord);
 
-    return (pixelator * (scanlineTest + invert) );
+    return (pixelator * scanlineTest);
 }
 
 void main()
@@ -228,12 +253,15 @@ void main()
     vec2 scale = (texSize - texelSize) / texSize;
     vec2 texCoord = vTexCoord / scale + texelSize * 0.5f; 
     
-    scanlineTimer = screenPos;
+    scanlineTimer = scanPos;
+    scanlineSize = scanSize;
     edgeDif = difference / 10;
     pixelAmount = pixels * 10;
     colorDif = colorDifference;
     whiteColorDif = whiteColor;
-
+    distCheck = dist;
+    constantTime = constTimer;
+    sinVal = xAndY;
     switch(postProcessTarget)
     {
         case 0: //Default
@@ -277,7 +305,7 @@ void main()
         break;
 
         case 10: //Distance Fog
-        FragColour = Distance(texCoord); // Havent looked into
+        FragColour = Fog(texCoord); // Havent looked into
         break;
 
         case 11: //Depth of Field
@@ -289,7 +317,7 @@ void main()
         break;
 
         case 13: //Combine
-        FragColour = Combine(texCoord); // Havent looked into
+        FragColour = PixilLines(texCoord); // Havent looked into
         break;
     }
 

@@ -43,6 +43,7 @@ protected:
 	bool showPlanets;
 	Scene* m_scene;
 	float m_scanlineTimer = 100;
+	float m_timer = 0;
 	
 	float windowWidth;
 

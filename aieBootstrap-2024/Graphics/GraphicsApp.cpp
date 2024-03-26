@@ -62,6 +62,8 @@ bool GraphicsApp::startup() {
 	globalLight.intensity = 10;
 
 	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), globalLight);	
+	m_screenQuad.InitialiseFullScreenQuad();
+
 	return LaunchShaders();
 }
 
@@ -95,6 +97,8 @@ void GraphicsApp::update(float deltaTime) {
 	m_scene->ImGUI_Functions((float)getWindowWidth(), (float)getWindowHeight());
 	
 	m_scanlineTimer += deltaTime * deltaTime;
+	m_timer += deltaTime;
+
 	ImGUI_Helper();
 
 	float aspecitRatio = getWindowWidth() / (float)getWindowHeight();
@@ -102,7 +106,7 @@ void GraphicsApp::update(float deltaTime) {
 	
 	if (windowWidth != getWindowWidth())
 	{
-		m_renderTarget.initialise(1, getWindowWidth(), (float)getWindowHeight());		
+		m_renderTarget.initialise(2, getWindowWidth(), (float)getWindowHeight(), true);		
 	}
 
 	windowWidth = getWindowWidth();	
@@ -148,11 +152,11 @@ void GraphicsApp::draw() {
 	// update perspective based on screen size
 	m_viewMatrix = bc->GetViewMatrix(); 
 	m_projectionMatrix = bc->GetProjectionMatrix();
-	m_scene->Draw();
 
 	auto pv = m_projectionMatrix * m_viewMatrix;	 
-
 	Gizmos::draw(pv);
+
+	m_scene->Draw();
 
 	// Unbind the target from the backbuffer
 	m_renderTarget.unbind();
@@ -161,22 +165,26 @@ void GraphicsApp::draw() {
 	clearScreen();
 	
 	float screenHeight = (float)getWindowHeight();
+	glEnable(GL_DEPTH);
 
 	m_postProcess.bind();
 	m_postProcess.bindUniform("colorTarget", 0);
 	m_postProcess.bindUniform("depthTarget", 1);
 	m_postProcess.bindUniform("postProcessTarget", m_scene->GetPostProcess());
-	m_postProcess.bindUniform("screenPos", m_scanlineTimer);
+	m_postProcess.bindUniform("scanPos", m_scanlineTimer);
+	m_postProcess.bindUniform("scanSize", m_scene->GetScaneSize());
 	m_postProcess.bindUniform("difference", m_scene->GetEdgeDetection());
 	m_postProcess.bindUniform("pixels", m_scene->GetPixelAmount());
 	m_postProcess.bindUniform("colorDifference", m_scene->GetColorDif());
 	m_postProcess.bindUniform("whiteColor", m_scene->GetWhiteColorDif());
+	m_postProcess.bindUniform("dist", m_scene->GetFogDist());
+	m_postProcess.bindUniform("constTimer", m_timer);
+	m_postProcess.bindUniform("xAndY", m_scene->GetSinVal());
 		
 	m_renderTarget.getTarget(0).bind(0);
-	//m_renderTarget.bindDepthTarget(0);
+	m_renderTarget.bindDepthTarget(1);
 
-	m_screenQuad.Draw();	
-
+	m_screenQuad.Draw();
 }
 
 void GraphicsApp::ImGUI_Helper()
@@ -187,6 +195,8 @@ void GraphicsApp::ImGUI_Helper()
 bool GraphicsApp::LaunchShaders()
 {
 	// Loading Shaders
+	
+
 	if (!LoadShaders(m_boundTexture, "./shaders/textured.", "Textured", false))
 		return false;
 
@@ -200,20 +210,15 @@ bool GraphicsApp::LaunchShaders()
 		return false;
 
 
-	if (m_renderTarget.initialise(1, getWindowWidth(), (float)getWindowHeight(), true) == false)
-	{
-		printf("Render Target has an error!!\n");
-		return false;
-	}
-
 	if (m_renderTarget.initialise(2, getWindowWidth(), (float)getWindowHeight(), true) == false)
 	{
 		printf("Render Target has an error!!\n");
 		return false;
 	}
 
+
 	m_quadMesh.InitialiseQuad();
-	m_screenQuad.InitialiseFullScreenQuad();
+	SpawnSquare();
 
 	m_quadTransform = {
 		10,0,0,0,

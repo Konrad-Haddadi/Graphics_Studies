@@ -39,10 +39,13 @@ public:
 	int GetNumberOfLights() { return m_pointLights.size(); }
 	int GetPostProcess() { return m_postProcess; }
 	int GetPixelAmount() { return m_pixel; }
+	int GetScaneSize() { return m_scaneSize; }
+	int GetFogDist() { return m_distFog; }
 	float GetScanlineDist() { return m_scanlineDist; }
 	float GetEdgeDetection() { return m_edgeDetection; }
 	float GetColorDif() { return m_colorDifference; }
 	float GetWhiteColorDif() { return m_whiteColor; }
+	glm::vec2 GetSinVal() { return m_sinVal; }
 
 	glm::vec3* GetPointLightPositions() { return &m_pointLightPositions[0]; }
 	glm::vec3* GetPointLightColors() { return &m_pointLightColors[0]; }
@@ -53,10 +56,15 @@ protected:
 	float m_edgeDetection = .5f;
 	float m_colorDifference = 1;
 	float m_whiteColor = 0.5f;
-	int m_pixel = 1;
-	int m_postProcess = 0;
 	float m_scanlineDist = 0;
+	int m_scaneSize = 1000;
+	int m_pixel = 1;
+	int m_distFog = 1;
+	int m_postProcess = 0;
+	glm::vec2 m_sinVal;
+	
 	bool openMenu;
+
 
 	bool m_addLight;
 	bool m_addObjects1;

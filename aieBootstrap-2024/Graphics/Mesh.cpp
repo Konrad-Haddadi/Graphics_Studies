@@ -125,6 +125,9 @@ void Mesh::InitialiseFullScreenQuad()
 	// check that the mesh is not initialized aleady
 	assert(m_vao == 0);
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	// generate bffers
 	glGenBuffers(1, &m_vbo);
 	glGenVertexArrays(1, &m_vao);
@@ -139,13 +142,13 @@ void Mesh::InitialiseFullScreenQuad()
 
 	float vertices[] = {
 
-	   -.5, 1, // Left Top
-	   -0.5,-0.5, // Left Bottom
-		0.5, 1, // Right Top
+	   -1, 1, // Left Top
+	   -1,-1, // Left Bottom
+		1, 1, // Right Top
 	   
-		-0.5,-0.5, // Left Bottom
-		0.5,-0.5, // Right Bottom
-		0.5, 1,  // Right top
+		-1,-1, // Left Bottom
+		1,-1, // Right Bottom
+		1, 1,  // Right top
 	};
 	
 	// Fill vertex buffer
