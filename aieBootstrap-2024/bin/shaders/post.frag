@@ -258,6 +258,7 @@ void main()
     distCheck = dist;
     constantTime = constTimer;
     sinVal = xAndY;
+    
     switch(postProcessTarget)
     {
         case 0: //Default

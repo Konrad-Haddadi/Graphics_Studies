@@ -6,10 +6,11 @@
 #include "Lights.h"
 #include "OBJMesh.h"
 #include "Shader.h"
+#include "Mesh.h"
 #include <map>
 
 class BaseCamera;
-class Instance;
+class GameObject;
 
 const int MAX_LIGHTS = 4;
 
@@ -19,14 +20,16 @@ public:
 	Scene(BaseCamera* _camera, glm::vec2 _windowSize, Lights& _globalLight);
 	~Scene();
 
-	void AddInstance(Instance* _instance);
+	void AddGameObject(GameObject* _instance);
 	void Update(float _dt);
 	void Draw();
 	void ImGUI_Functions(float _windowWidth, float _windowHeight);
 
 	void AddPointLights(Lights _light) { m_pointLights.push_back(_light); };
 	void AddShader(aie::ShaderProgram* _newShader, std::string _name);
-	void AddMesh(aie::OBJMesh* _newMesh, std::string _name);
+	void AddSimpleShader(aie::ShaderProgram* _newShader, std::string _name);
+	void AddComplexMesh(aie::OBJMesh* _newMesh, std::string _name);
+	void AddSimpleMesh(Mesh* _newMesh, std::string _name);
 
 	BaseCamera* GetCamera() { return m_camera; }
 	glm::vec2 GetWindowSize() { return m_windowSize; }
@@ -67,19 +70,21 @@ protected:
 
 
 	bool m_addLight;
-	bool m_addObjects1;
+	bool m_addObjects;
+	bool m_addSimpleObjects;
 
 	std::map<std::string, bool> m_objects;
 
 	
 	// Object 
-	std::vector<aie::ShaderProgram*> m_currentShader;
+	std::vector<aie::ShaderProgram*> m_shaderType;
 	std::vector<std::string> m_shaderNames;
-	std::vector<aie::OBJMesh*> m_currentMesh;
+	std::vector<aie::OBJMesh*> m_complexMesh;
+	std::vector<Mesh*> m_simpleMesh;
 
 	BaseCamera* m_camera;
 	glm::vec2 m_windowSize;
-	std::list<Instance*> m_instances;
+	std::list<GameObject*> m_gameObjects;
 	std::vector<Lights> m_pointLights;
 	Lights m_globalLight;
 

@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "OBJMesh.h"
 #include "Scene.h"
+#include "GameObject.h"
 #include "BaseCamera.h"
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -10,14 +11,13 @@
 #include <string>
 
 Instance::Instance(glm::mat4 _transform, aie::OBJMesh* _mesh, aie::ShaderProgram* _shader, std::string _name, bool _invertLightDir, bool _isUntextured)
-	: m_transform(_transform), m_mesh(_mesh), m_shader(_shader), m_isUntextured(_isUntextured), name(_name), m_invertLight(_invertLightDir) , remove(false), layerSample(0)
+	: GameObject(_transform, _shader, _name), m_isUntextured(_isUntextured), m_invertLight(_invertLightDir), layerSample(0), m_mesh(_mesh)
 {
 }
 
 Instance::Instance(glm::vec3 _pos, glm::vec3 _eulerAngels, glm::vec3 _scale, aie::OBJMesh* _mesh, aie::ShaderProgram* _shader, std::string _name, bool _invertLightDir, bool _isUntextured)
-	: m_mesh(_mesh), m_shader(_shader), m_isUntextured(_isUntextured), name(_name), m_invertLight(_invertLightDir), remove(false), layerSample(0)
+	: GameObject(_pos, _eulerAngels, _scale, _shader, _name), m_isUntextured(_isUntextured), m_invertLight(_invertLightDir),layerSample(0), m_mesh(_mesh)
 {
-	m_transform = Instance::MakeTransform(_pos, _eulerAngels, _scale);
 }
 
 Instance::~Instance()
@@ -124,11 +124,3 @@ void Instance::ImGUI_Functions(std::string _addToName, bool _canRemove)
 		m_transform = glm::scale(glm::mat4(1), glm::vec3(scaleSetter));	
 }
 
-glm::mat4 Instance::MakeTransform(glm::vec3 _pos, glm::vec3 _angle, glm::vec3 _scale)
-{
-	return glm::translate(glm::mat4(1), _pos) *
-		glm::rotate(glm::mat4(1), glm::radians(_angle.z), glm::vec3(0, 0, 1)) *
-		glm::rotate(glm::mat4(1), glm::radians(_angle.y), glm::vec3(0, 1, 0)) *
-		glm::rotate(glm::mat4(1), glm::radians(_angle.x), glm::vec3(1, 0, 0)) *
-		glm::scale(glm::mat4(1), _scale);
-}

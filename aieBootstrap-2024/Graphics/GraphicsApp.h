@@ -34,9 +34,10 @@ public:
 protected:
 
 	bool LaunchShaders();
-	bool LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, bool _addToScene = true);
+	bool LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, int _addToScene = 0);
 
-	bool ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename = " ", bool _flipTextures = false, float _scale = 1.f, glm::vec3 _position = { 0,0,0 });
+	bool ComplexObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename = " ", bool _flipTextures = false, float _scale = 1.f, glm::vec3 _position = { 0,0,0 });
+	bool SimpleObjLoader(Mesh& __objMesh, glm::mat4& _transform, std::string _filename = " ");
 
 	void SolarSystem(float _speed);
 

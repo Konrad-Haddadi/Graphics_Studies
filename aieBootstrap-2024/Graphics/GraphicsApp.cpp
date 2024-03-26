@@ -143,8 +143,6 @@ void GraphicsApp::draw() {
 
 	// custom function
 
-
-
 	if (showPlanets)
 	{
 		for each (Planet * planet in solarSystem)
@@ -154,19 +152,9 @@ void GraphicsApp::draw() {
 	// update perspective based on screen size
 	m_viewMatrix = bc->GetViewMatrix(); 
 	m_projectionMatrix = bc->GetProjectionMatrix();
-
-
+		
+	auto pv = m_projectionMatrix * m_viewMatrix;
 	
-
-	m_color.bind();
-	m_color.bindUniform("ProjectionViewModel", m_boxTransform);
-	m_color.bindUniform("Kd", glm::vec3(1,1,1));
-
-	m_boxMesh.Draw();
-
-
-
-	auto pv = m_projectionMatrix * m_viewMatrix;	 
 	Gizmos::draw(pv);
 
 	m_scene->Draw();
@@ -209,16 +197,16 @@ bool GraphicsApp::LaunchShaders()
 	// Loading Shaders
 	
 
-	if (!LoadShaders(m_boundTexture, "./shaders/textured.", "Textured", false))
+	if (!LoadShaders(m_boundTexture, "./shaders/textured.", "Textured"))
 		return false;
 
-	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader"))
+	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader", 1))
 		return false;
 
-	if (!LoadShaders(m_color, "./shaders/color.", "Color", false))
+	if (!LoadShaders(m_color, "./shaders/color.", "Color", 2))
 		return false;
 
-	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing", false))
+	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing"))
 		return false;
 
 
@@ -240,7 +228,8 @@ bool GraphicsApp::LaunchShaders()
 	};
 
 	// Load Mesh using Transform
-	ObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
+	ComplexObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
+	SimpleObjLoader(m_boxMesh, m_boxTransform, "Box");
 	//ObjLoader(m_cityMesh, m_cityTransform, "./moutain/LP.obj", "Land", true); 	
 	//ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
 
@@ -265,11 +254,13 @@ void GraphicsApp::SpawnCube()
 	vertices[6].position = { -0.5f, -0.5f, -0.5f, 1 }; // front left 
 	vertices[7].position = { 0.5f, -0.5f, -0.5f, 1 };	// back left
 
-	unsigned int indices[38] = { 2, 3, 1, 1, 0, 2,
-								  7, 5, 1, 1, 3, 7,
-								  6, 7, 3, 3, 2, 6,
-								  5, 4, 0, 0, 1, 5,
-								  4, 5, 6, 6, 5, 7 };
+	unsigned int indices[36] = {1, 3, 2, 2, 0, 1,
+								1, 5, 7, 7, 3, 1,
+								3, 7, 6, 6, 2, 3,
+								0, 4, 5, 5, 1, 0,
+								6, 5, 4, 6, 7, 5, 
+								6, 4, 2, 4, 0, 2 
+	};
 
 
 	m_boxTransform = {
@@ -279,7 +270,7 @@ void GraphicsApp::SpawnCube()
 		0,0,0,1
 	};
 
-	m_boxMesh.Initialise(8, vertices, 38, indices);
+	m_boxMesh.Initialise(8, vertices, 36, indices);
 
 }
 
@@ -323,7 +314,7 @@ void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
 	//m_boxMesh.Initialise(8, vertices, 38, indices);
 }
 
-bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, bool _addToScene)
+bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, int _addToScene)
 {
 	std::string vert = _filePath;
 	std::string frag = _filePath;
@@ -337,19 +328,28 @@ bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _fi
 		return false;
 	}
 
-	if(_addToScene)
+	switch (_addToScene)
+	{
+	case 1:
 		m_scene->AddShader(&_shaderToLoad, _errorName);
+		break;
+
+	case 2:
+		m_scene->AddSimpleShader(&_shaderToLoad, _errorName);
+		break;
+	}
 
 	return true;
 }
 
-bool GraphicsApp::ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename, bool _flipTextures, float _scale, glm::vec3 _position) 
+bool GraphicsApp::ComplexObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename, bool _flipTextures, float _scale, glm::vec3 _position) 
 {
 	if (__objMesh.load(_filepath, true, _flipTextures) == false)
 	{
 		printf("Object Mesh loading had an error");
 		return false;
 	}
+
 
 	_transform = {
 		_scale, 0,0,0,
@@ -358,8 +358,22 @@ bool GraphicsApp::ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, cons
 		_position.x, _position.y, _position.z, 1
 	};
 
-	m_scene->AddMesh(&__objMesh, _filename);
+	std::string name = "C";	
+	m_scene->AddComplexMesh(&__objMesh, name.append(_filename).c_str());
+	return false;
+}
 
+bool GraphicsApp::SimpleObjLoader(Mesh& __objMesh, glm::mat4& _transform, std::string _filename)
+{
+	_transform = {
+		1, 0,0,0,
+		0, 1, 0,0,
+		0,0,1, 0,
+		0,0,0, 1
+	};
+	std::string name = "S";
+
+	m_scene->AddSimpleMesh(&__objMesh, name.append(_filename).c_str());
 	return false;
 }
 

@@ -1,6 +1,8 @@
 #include "Scene.h"
 #include "BaseCamera.h"
+#include "GameObject.h"
 #include "Instance.h"
+#include "SimpleObjects.h"
 #include <imgui_glfw3.h>
 #include <string>
 #include <vector>
@@ -13,22 +15,22 @@ Scene::Scene(BaseCamera* _camera, glm::vec2 _windowSize, Lights& _globalLight)
 {
 	m_addLight = false;
 
-	m_addObjects1 = false;
+	m_addObjects = false;
 	
 	openMenu = false;
 }
 
 Scene::~Scene()
 {
-	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+	for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
 	{
 		delete* it;
 	}
 }
 
-void Scene::AddInstance(Instance* _instance)
+void Scene::AddGameObject(GameObject* _instance)
 {
-	m_instances.push_back(_instance);
+	m_gameObjects.push_back(_instance);	
 }
 
 void Scene::Update(float _dt)
@@ -50,9 +52,18 @@ void Scene::Update(float _dt)
 	while (it != m_objects.end())
 	{
 		if (m_objects.at(it->first))
-		{
-			AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_currentMesh[meshCount], m_currentShader[0], it->first));
-			m_objects.at(it->first) = false;
+		{			
+			if (it->first[0] == 'C')
+			{
+				AddGameObject(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_complexMesh[0], m_shaderType[0], it->first));
+				m_objects.at(it->first) = false;
+			}
+			else
+			{
+				AddGameObject(new SimpleObjects(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1), m_simpleMesh[0], m_shaderType[1], it->first));
+				m_objects.at(it->first) = false;
+			}
+			
 		}
 
 		it++;
@@ -68,15 +79,15 @@ void Scene::Update(float _dt)
 			m_pointLights.erase(m_pointLights.begin() + i);
 	}
 
-	if (m_instances.size() > 0)
+	if (m_gameObjects.size() > 0)
 	{
-		for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+		for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
 		{
-			Instance* instance = *it;
+			GameObject* instance = *it;
 
 			if (instance->remove)
 			{
-				m_instances.remove(*it);
+				m_gameObjects.remove(*it);
 				return;
 			}
 		}
@@ -92,9 +103,9 @@ void Scene::Draw()
 		m_pointLightColors[i] = m_pointLights[i].GetColor();
 	}
 
-	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+	for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
 	{
-		Instance* instance = *it;
+		GameObject* instance = *it;
 		instance->Draw(this);
 	}	
 }
@@ -185,9 +196,9 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 	ImGui::SetWindowPos({ _windowWidth - _windowWidth / 5,0 });
 	ImGui::SetWindowSize({ _windowWidth / 5,	_windowHeight });
 	int i = 0;
-	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+	for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
 	{
-		Instance* instance = *it;
+		GameObject* instance = *it;
 
 		std::string name = " ";
 		name += i + 1 + 48;
@@ -202,12 +213,24 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 
 void Scene::AddShader(aie::ShaderProgram* _newShader, std::string _name)
 {
-	m_currentShader.push_back(_newShader);
+	m_shaderType.push_back(_newShader);
 	m_shaderNames.push_back(_name);
 }
 
-void Scene::AddMesh(aie::OBJMesh* _newMesh, std::string _name)
+void Scene::AddSimpleShader(aie::ShaderProgram* _newShader, std::string _name)
 {
-	m_currentMesh.push_back(_newMesh); 
+	m_shaderType.push_back(_newShader);
+	m_shaderNames.push_back(_name);
+}
+
+void Scene::AddComplexMesh(aie::OBJMesh* _newMesh, std::string _name)
+{
+	m_complexMesh.push_back(_newMesh); 
 	m_objects.insert({_name, false});
+}
+
+void Scene::AddSimpleMesh(Mesh* _newMesh, std::string _name)
+{
+	m_simpleMesh.push_back(_newMesh);
+	m_objects.insert({ _name, false });
 }

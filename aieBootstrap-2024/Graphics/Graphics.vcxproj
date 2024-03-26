@@ -177,6 +177,7 @@
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SimpleObjects.cpp" />
     <ClCompile Include="StationaryCamera.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SimpleCamera.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="Planet.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SimpleObjects.h" />
     <ClInclude Include="StationaryCamera.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SimpleCamera.h" />
