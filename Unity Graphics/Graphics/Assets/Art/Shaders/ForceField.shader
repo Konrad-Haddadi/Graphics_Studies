@@ -82,7 +82,7 @@ Shader "Custom/ForceField"
             struct v2f
             {
                 half3 normal :NORMAL;
-                float4 position : SV_POSITION;
+                float4 vertex : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float4 worldVertex : TANGENT;
             };
@@ -91,14 +91,28 @@ Shader "Custom/ForceField"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex + normalize(v.normal) * _OutlineThickness * 0.05);
+                o.vertex = UnityObjectToClipPos(v.vertex + normalize(v.normal) * _OutlineThickness * (1 - _Timer));
                 o.normal = UnityObjectToWorldNormal(v.normal);
+                o.uv = TRANSFORM_TEX(v.uv, _OutlineTexture);
+                o.uv.y -= _Time.y;
+                o.worldVertex = mul(UNITY_MATRIX_M, v.vertex);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return _OutlineColor;
+                half3 reflect = 2 * dot(i.normal, _WorldSpaceLightPos0.xyz) * i.normal - _WorldSpaceLightPos0.xyz;
+                half3 dir = normalize(_WorldSpaceCameraPos - i.worldVertex);
+                float spec = max(0, dot(reflect, dir));
+                
+                spec = pow(spec, 256);
+
+                half rim = 1.0 - saturate(dot(dir, i.normal));
+
+                //spec = spec * spec * spec * spec; 
+                //spec = spec * spec * spec * spec;
+
+                return _OutlineColor * tex2D(_OutlineTexture, i.uv) + (spec + rim) * fixed4(1,1,1,1);
             }
             ENDCG
         }
