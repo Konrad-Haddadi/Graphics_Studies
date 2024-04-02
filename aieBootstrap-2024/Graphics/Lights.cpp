@@ -32,9 +32,9 @@ void Lights::ImGUI_Functions(std::string _name, bool _canRemove)
 	
 	ImGui::Text(" ");
 
-	direction += movePos *0.25f;
+	direction += movePos * 0.25f;
 
 	glm::vec3 dist = { direction.x, direction.y, direction.z };
-	aie::Gizmos::addSphere(dist, intensity / 50, 10, 10, glm::vec4(color.x, color.y, color.z, 0.75f));
+	aie::Gizmos::addSphere(dist, intensity / 50, 10, 10, glm::vec4(color.x, color.y, color.z, 0.5f));
 
 }

@@ -30,5 +30,7 @@ protected:
 	aie::OBJMesh* m_mesh;
 	bool m_invertLight;
 	bool m_isUntextured;
+
+
 };
 

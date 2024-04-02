@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "RenderTarget.h"
+#include "ParticleEmitter.h"
 
 #include <glm/mat4x4.hpp>
 #include <vector>
@@ -36,9 +37,11 @@ protected:
 	bool LaunchShaders();
 	bool LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, int _addToScene = 0);
 
+	bool ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename, bool _flipTextures, float _scale, glm::vec3 _position);
 	bool ComplexObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename = " ", bool _flipTextures = false, float _scale = 1.f, glm::vec3 _position = { 0,0,0 });
 	bool SimpleObjLoader(Mesh& __objMesh, glm::mat4& _transform, std::string _filename = " ");
 
+	void DrawBackground();
 	void SolarSystem(float _speed);
 
 	bool showPlanets;
@@ -62,6 +65,7 @@ protected:
 	aie::ShaderProgram m_normalMapPhong;
 	aie::ShaderProgram m_boundTexture;
 	aie::ShaderProgram m_postProcess;
+	aie::ShaderProgram m_particleShader;
 
 	struct BasicLight {
 		glm::vec3 direction;
@@ -88,10 +92,10 @@ protected:
 	glm::mat4 m_spearTransform;
 	aie::Texture m_spearTexture;
 
-	// City
-	aie::OBJMesh m_cityMesh;
-	glm::mat4 m_cityTransform;
-	aie::Texture m_cityTexture;
+	// Environment
+	aie::OBJMesh m_environmentMesh;
+	glm::mat4 m_environmentTransform;
+	aie::Texture m_environmentTexture;
 
 	// Bunny Mesh
 	aie::OBJMesh m_bunnyMesh;
@@ -100,8 +104,8 @@ protected:
 	// Super Meat Boy
 	aie::OBJMesh m_meatBoyMesh;
 	glm::mat4 m_meatBoyTransform;
-	aie::ShaderProgram m_meatBoyShader;
 	aie::Texture m_meatBoyTexture;
+
 
 	// Dragon Mesh
 	aie::OBJMesh m_dragonMesh;
@@ -112,7 +116,12 @@ protected:
 	glm::mat4 m_quadTransform;
 	glm::mat4 m_boxTransform;
 
+	// Cameras
 	FlyCamera m_flyCamera;
 	StationaryCamera m_stationaryCamera;
 	OrbitalCamera m_orbitingCamera;
+
+	// Particle
+	ParticleEmitter* m_emitter;
+	glm::mat4 m_particleTransform;
 };

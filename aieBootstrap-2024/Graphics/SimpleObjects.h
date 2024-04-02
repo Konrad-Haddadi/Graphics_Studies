@@ -12,5 +12,8 @@ public:
 
 	void Draw(Scene* _scene) override;
 	void ImGUI_Functions(std::string _addToName, bool _canRemove) override;
+
+protected:
+	glm::vec4 m_color;
 };
 

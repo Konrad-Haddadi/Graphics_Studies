@@ -16,16 +16,16 @@ void StationaryCamera::Update(float _deltaTime)
 	glm::vec3 move = glm::vec3(0);
 
 	if (input->isKeyDown(aie::INPUT_KEY_W))
-		move += vec3(15,0,0);
+		move += glm::vec3(15,0,0);
 
 	if (input->isKeyDown(aie::INPUT_KEY_S))
-		move -= vec3(15, 0, 0);
+		move -= glm::vec3(15, 0, 0);
 
 	if (input->isKeyDown(aie::INPUT_KEY_A))
-		move -= vec3(0, 15, 0);
+		move -= glm::vec3(0, 15, 0);
 
 	if (input->isKeyDown(aie::INPUT_KEY_D))
-		move += vec3(0, 15, 0);
+		move += glm::vec3(0, 15, 0);
 
 	SetRotation(move);
 }

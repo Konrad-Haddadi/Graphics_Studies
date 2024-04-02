@@ -5,6 +5,7 @@
 #include "FlyCamera.h"
 #include "BaseCamera.h"
 #include "Lights.h"
+#include "ParticleEmitter.h"
 
 #include <imgui_glfw3.h>
 #include <glm/glm.hpp>
@@ -93,6 +94,8 @@ void GraphicsApp::update(float deltaTime) {
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
 
+	m_emitter->Update(deltaTime, bc->GetTransform(glm::vec3(0), glm::vec3(0), glm::vec3(1)));
+
 	m_scene->Update(deltaTime);
 	m_scene->ImGUI_Functions((float)getWindowWidth(), (float)getWindowHeight());
 	
@@ -110,6 +113,7 @@ void GraphicsApp::update(float deltaTime) {
 	}
 
 	windowWidth = getWindowWidth();	
+
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 
 	m_flyCamera.SetAspectRatio(getWindowWidth(), (float)getWindowHeight());
@@ -154,11 +158,22 @@ void GraphicsApp::draw() {
 	m_projectionMatrix = bc->GetProjectionMatrix();
 		
 	auto pv = m_projectionMatrix * m_viewMatrix;
-	
+	auto pvm = m_projectionMatrix * m_viewMatrix * mat4(1);
+
 	Gizmos::draw(pv);
+
+	// bind particle shader
+	m_particleShader.bind();
+
+	// bind particle transform
+	m_particleShader.bindUniform("ProjectionViewModel", pv * m_particleTransform);
+	m_emitter->Draw();
+
 
 	m_scene->Draw();
 
+	//DrawBackground();
+	
 	// Unbind the target from the backbuffer
 	m_renderTarget.unbind();
 
@@ -179,6 +194,9 @@ void GraphicsApp::draw() {
 	m_postProcess.bindUniform("colorDifference", m_scene->GetColorDif());
 	m_postProcess.bindUniform("whiteColor", m_scene->GetWhiteColorDif());
 	m_postProcess.bindUniform("dist", m_scene->GetFogDist());
+	m_postProcess.bindUniform("blurAmount", m_scene->GetBlurAmount());
+
+	//m_postProcess.bindUniform("blurDist", m_scene->GetBlurDist());
 	//m_postProcess.bindUniform("constTimer", m_timer);
 		
 	m_renderTarget.getTarget(0).bind(0);
@@ -195,11 +213,6 @@ void GraphicsApp::ImGUI_Helper()
 bool GraphicsApp::LaunchShaders()
 {
 	// Loading Shaders
-	
-
-	if (!LoadShaders(m_boundTexture, "./shaders/textured.", "Textured"))
-		return false;
-
 	if (!LoadShaders(m_normalMapPhong, "./shaders/normalMap.", "Textured and Normal Shader", 1))
 		return false;
 
@@ -209,12 +222,26 @@ bool GraphicsApp::LaunchShaders()
 	if (!LoadShaders(m_postProcess, "./shaders/post.", "Post Processing"))
 		return false;
 
+	if (!LoadShaders(m_particleShader, "./shaders/particle.", "Particles"))
+		return false;
+
 
 	if (m_renderTarget.initialise(2, getWindowWidth(), (float)getWindowHeight(), true) == false)
 	{
 		printf("Render Target has an error!!\n");
 		return false;
 	}
+
+
+	m_emitter = new ParticleEmitter();
+	m_emitter->Initialise(1000, 500, 0.1f, 1.0f, 1, 5, 1, 0.1f, glm::vec4(1, 0, 0, 1), glm::vec4(1, 1, 0, 1));
+
+	m_particleTransform = {
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	};
 
 
 	m_quadMesh.InitialiseQuad();
@@ -230,7 +257,7 @@ bool GraphicsApp::LaunchShaders()
 	// Load Mesh using Transform
 	ComplexObjLoader(m_spearMesh, m_spearTransform, "./soulspear/soulspear.obj", "Spear", true); 	
 	SimpleObjLoader(m_boxMesh, m_boxTransform, "Box");
-	//ObjLoader(m_cityMesh, m_cityTransform, "./moutain/LP.obj", "Land", true); 	
+	//ObjLoader(m_environmentMesh, m_environmentTransform, "./moutain/LP.obj", "Land", true, 0.1,glm::vec3(0,-20, 0)); 	
 	//ObjLoader(m_meatBoyMesh, m_meatBoyTransform, "./super_meatboy/Super_meatboy.obj", "MeatBoy", true);
 
 
@@ -309,9 +336,6 @@ void GraphicsApp::SpawnCylinder(float _radius, float _height, int _segments)
 	vertices[4].position = { -0.5f, 0, -0.5f, 1 }; // front left 
 	vertices[6].position = { 0.5f, 0, -0.5f, 1 };	// back left
 
-
-
-	//m_boxMesh.Initialise(8, vertices, 38, indices);
 }
 
 bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _filePath, std::string _errorName, int _addToScene)
@@ -341,6 +365,26 @@ bool GraphicsApp::LoadShaders(aie::ShaderProgram& _shaderToLoad, const char* _fi
 
 	return true;
 }
+
+bool GraphicsApp::ObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename, bool _flipTextures, float _scale, glm::vec3 _position)
+{
+	if (__objMesh.load(_filepath, true, _flipTextures) == false)
+	{
+		printf("Object Mesh loading had an error");
+		return false;
+	}
+
+
+	_transform = {
+		_scale, 0,0,0,
+		0, _scale, 0,0,
+		0,0,_scale, 0,
+		_position.x, _position.y, _position.z, 1
+	};
+
+	return false;
+}
+
 
 bool GraphicsApp::ComplexObjLoader(aie::OBJMesh& __objMesh, glm::mat4& _transform, const char* _filepath, std::string _filename, bool _flipTextures, float _scale, glm::vec3 _position) 
 {
@@ -375,6 +419,37 @@ bool GraphicsApp::SimpleObjLoader(Mesh& __objMesh, glm::mat4& _transform, std::s
 
 	m_scene->AddSimpleMesh(&__objMesh, name.append(_filename).c_str());
 	return false;
+}
+
+void GraphicsApp::DrawBackground()
+{
+	BaseCamera* bc = m_scene->GetCamera();
+
+	auto pv = bc->GetProjectionMatrix(m_scene->GetWindowSize()) * bc->GetViewMatrix();
+
+	m_normalMapPhong.bind();
+	m_normalMapPhong.bindUniform("ProjectionViewModel", pv * m_environmentTransform);
+	m_normalMapPhong.bindUniform("ModelMatrix", m_environmentTransform);
+
+	m_normalMapPhong.bindUniform("diffuseTexture", 0);
+	m_normalMapPhong.bindUniform("specularTexture", 0);
+	m_normalMapPhong.bindUniform("normalTexture", 0);
+	
+	m_normalMapPhong.bindUniform("CameraPosition", bc->GetPosition());
+	
+	
+	m_normalMapPhong.bindUniform("LightDirection", m_scene->GetGlobalLight().direction);
+	m_normalMapPhong.bindUniform("ambientLight", m_scene->GetAmbeintLightColor());
+	m_normalMapPhong.bindUniform("diffuseLight", m_scene->GetAmbeintLightColor());
+
+	int numberOfLights = m_scene->GetNumberOfLights();
+
+	m_normalMapPhong.bindUniform("NumberOfLights", numberOfLights);
+
+	m_normalMapPhong.bindUniform("PointLightPositions", numberOfLights, m_scene->GetPointLightPositions());
+	m_normalMapPhong.bindUniform("PointLightColors", numberOfLights, m_scene->GetPointLightColors());
+
+	m_environmentMesh.draw();
 }
 
 void GraphicsApp::SolarSystem(float _speed)

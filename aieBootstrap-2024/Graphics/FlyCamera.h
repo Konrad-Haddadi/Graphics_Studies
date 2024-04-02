@@ -11,6 +11,6 @@ public:
 
 private:
 	float m_speed = glm::radians(360.f);
-	vec3 m_up = vec3(0,1,0);
+	glm::vec3 m_up = glm::vec3(0,1,0);
 };
 

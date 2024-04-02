@@ -48,6 +48,8 @@ public:
 	float GetEdgeDetection() { return m_edgeDetection; }
 	float GetColorDif() { return m_colorDifference; }
 	float GetWhiteColorDif() { return m_whiteColor; }
+	float GetBlurDist() { return m_blurDist; }
+	float GetBlurAmount() { return m_blurAmount; }
 	glm::vec2 GetSinVal() { return m_sinVal; }
 
 	glm::vec3* GetPointLightPositions() { return &m_pointLightPositions[0]; }
@@ -60,6 +62,8 @@ protected:
 	float m_colorDifference = 1;
 	float m_whiteColor = 0.5f;
 	float m_scanlineDist = 0;
+	float m_blurDist = 0;
+	float m_blurAmount = 0;
 	int m_scaneSize = 1000;
 	int m_pixel = 1;
 	int m_distFog = 1;

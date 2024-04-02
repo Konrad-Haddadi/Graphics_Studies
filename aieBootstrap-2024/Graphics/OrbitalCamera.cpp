@@ -1,4 +1,5 @@
 #include "OrbitalCamera.h"
+#include <glm/glm.hpp>
 #include <Input.h>
 
 void OrbitalCamera::Update(float _deltaTime)
@@ -13,14 +14,15 @@ void OrbitalCamera::Update(float _deltaTime)
 
 	
 
+
 	m_theta = rotatePos.z - m_position.z * 1;
 	m_phi = 0;
 	
 }
 
-void OrbitalCamera::SetTarget(vec3 pos, float distanceToTarget)
+void OrbitalCamera::SetTarget(glm::vec3 pos, float distanceToTarget)
 {
-	rotatePos = pos + vec3(distanceToTarget,0,0);
+	rotatePos = pos + glm::vec3(distanceToTarget,0,0);
 }
 
 

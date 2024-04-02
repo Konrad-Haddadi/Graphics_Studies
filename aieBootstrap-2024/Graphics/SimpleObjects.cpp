@@ -8,13 +8,13 @@
 #include <glm/ext.hpp>
 
 SimpleObjects::SimpleObjects(glm::mat4 _transform, Mesh* _mesh, aie::ShaderProgram* _shader, std::string _name)
-	: GameObject(_transform, _shader, _name, _mesh)
+	: GameObject(_transform, _shader, _name, _mesh), m_color(glm::vec4(1))
 {
 }
 
 
 SimpleObjects::SimpleObjects(glm::vec3 _pos, glm::vec3 _eulerAngels, glm::vec3 _scale, Mesh* _mesh, aie::ShaderProgram* _shader, std::string _name)
-	: GameObject(_pos, _eulerAngels, _scale, _shader, _name, _mesh)
+	: GameObject(_pos, _eulerAngels, _scale, _shader, _name, _mesh), m_color(glm::vec4(1))
 {
 }
 
@@ -30,8 +30,9 @@ void SimpleObjects::Draw(Scene* _scene)
 
 	m_shader->bind();
 	m_shader->bindUniform("ProjectionViewModel", pv * m_transform);
-	m_shader->bindUniform("BaseColour", glm::vec4(1, 1, 1, 0.5f));
+	m_shader->bindUniform("BaseColour", m_color);
 	m_simpleMesh->Draw();
+
 
 }
 
@@ -51,44 +52,26 @@ void SimpleObjects::ImGUI_Functions(std::string _addToName, bool _canRemove)
 
 	if (_canRemove)
 	{
-		std::string nameRemove = "Remove " + nameAdd;
-		ImGui::Checkbox(nameRemove.c_str(), &remove);
+		std::string nameRemove = "Remove " + nameAdd; 
+		ImGui::Checkbox(nameRemove.c_str(), &remove); 
 	}
 
-	ImGui::Text("");
+	ImGui::Text(""); 
 
-	float scaleSetter = 0;
+	ImGui::InputFloat3(nameMove.c_str(), &m_position.x, -1, 1); 
+	ImGui::InputFloat3(nameRot.c_str(), &m_rotation.x, -1, 1);
+	ImGui::InputFloat3(nameScale.c_str(), &m_scale.x, 0.9f, 1.1f); 
 
-	glm::vec3 pos = glm::vec3(0);
-	glm::vec3 rot = glm::vec3(0);
-	glm::vec3 scale = glm::vec3(1);
-
-	glm::vec3 newPos = m_transform[3];
-	glm::vec3 oldPos = m_transform[3];
-
-	ImGui::InputFloat3(namePos.c_str(), &newPos.x, 0);
-
-	if (newPos != oldPos)
-		m_transform = glm::translate(glm::mat4(1), newPos);
-
-
-	ImGui::SliderFloat3(nameMove.c_str(), &pos.x, -1, 1);
-	ImGui::SliderFloat3(nameRot.c_str(), &rot.x, -1, 1);
-	ImGui::SliderFloat3(nameScale.c_str(), &scale.x, 0.9f, 1.1f);
-
-	ImGui::InputFloat(nameScaleOverAll.c_str(), &scaleSetter);
+	ImGui::DragFloat4(nameColor.c_str(), &m_color.x,0.01f, 0, 1);
 	ImGui::Text(" ");
 
-	pos = pos * 0.1f;
+	m_transform = glm::mat4(1);
 
-	m_transform *= glm::translate(glm::mat4(1), pos);
+	m_transform *= glm::translate(glm::mat4(1), m_position);
 
-	m_transform *= glm::rotate(glm::mat4(1), glm::radians(rot.z), glm::vec3(0, 0, 1)) *
-		glm::rotate(glm::mat4(1), glm::radians(rot.y), glm::vec3(0, 1, 0)) *
-		glm::rotate(glm::mat4(1), glm::radians(rot.x), glm::vec3(1, 0, 0));
+	m_transform *= glm::rotate(glm::mat4(1), glm::radians(m_rotation.z), glm::vec3(0, 0, 1)) *
+		glm::rotate(glm::mat4(1), glm::radians(m_rotation.y), glm::vec3(0, 1, 0)) *
+		glm::rotate(glm::mat4(1), glm::radians(m_rotation.x), glm::vec3(1, 0, 0));
 
-	m_transform *= glm::scale(glm::mat4(1), scale);
-
-	if (scaleSetter != 0)
-		m_transform = glm::scale(glm::mat4(1), glm::vec3(scaleSetter));
+	m_transform *= glm::scale(glm::mat4(1), m_scale);
 }

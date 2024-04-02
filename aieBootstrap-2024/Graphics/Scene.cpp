@@ -120,6 +120,9 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 
 	switch (m_postProcess)
 	{
+	case 2:
+		ImGui::InputFloat("Set Blur Amount:", &m_blurAmount, 0.1f);
+		break;
 	case 3:
 		ImGui::DragFloat("Set Edge Detection:", &m_edgeDetection, .01f, 0, 3);
 		break;
@@ -138,6 +141,14 @@ void Scene::ImGUI_Functions(float _windowWidth, float _windowHeight)
 
 	case 10:
 		ImGui::InputInt("Set Distance:", &m_distFog, 1);
+
+		break;
+
+	case 11:
+		ImGui::InputFloat("Set Blur Distance:", &m_blurDist, 1);
+		ImGui::InputFloat("Set Blur Amount:", &m_blurAmount, 0.1f);
+		ImGui::InputInt("Set Distance:", &m_distFog, 1);
+
 
 		break;
 	case 12:

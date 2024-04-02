@@ -31,7 +31,13 @@ public:
 	std::string name;
 
 protected:
+	glm::vec3 m_position;
+	glm::vec3 m_rotation;
+	glm::vec3 m_scale;
+	
 	aie::ShaderProgram* m_shader;
 	glm::mat4 m_transform;
 	Mesh* m_simpleMesh;
+
+
 };
