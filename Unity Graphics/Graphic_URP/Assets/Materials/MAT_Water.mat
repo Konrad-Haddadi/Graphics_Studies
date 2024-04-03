@@ -107,7 +107,7 @@ Material:
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
-    - _Depth: 2.5
+    - _Depth: 6.99
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
@@ -115,16 +115,16 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _Intensity: 1
+    - _Intensity: 1.77
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
-    - _PowerVal: 1
+    - _PowerVal: 2
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _ScaleMultiplier: 3
-    - _Scaler: 0
+    - _ScaleMultiplier: 4.28
+    - _Scaler: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -139,6 +139,6 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _TargetWaterColor: {r: 0.7902699, g: 0.990566, b: 0.71488965, a: 1}
-    - _WaterColor: {r: 0.056267843, g: 0.24528301, b: 0, a: 1}
+    - _TargetWaterColor: {r: 0.5018254, g: 0.7735849, b: 0.46342114, a: 1}
+    - _WaterColor: {r: 0.006541462, g: 0.46226418, b: 0.0071668676, a: 1}
   m_BuildTextureStacks: []
